@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tramo{
+  id Int @id @default(autoincrement())
+  inicio String
+  destino String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  observaciones Observacion[]
+}
+
+model Elemento{
+  id Int @id @default(autoincrement())
+  tipo String @unique
+  nombre String
+  descripcion String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  observaciones Observacion[]
+}
+
+model Imagen{
+  id Int @id @default(autoincrement())
+  nombre String
+  ruta String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  observaciones Observacion[]
+}
+
+model Observacion{
+  id Int @id @default(autoincrement())
+  clave String
+  kilometro String
+  coordenadas String
+  observaciones String?
+  recomendaciones String?
+  tramo_id Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  tramo Tramo @relation(fields: [tramo_id], references: [id])
+  elementos Elemento[]
+  imagenes Imagen[]
+}
