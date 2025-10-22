@@ -2,7 +2,7 @@
 function App() {
   return (
     <>
-      <p>ola</p>
+      <p>Hola</p>
     </>
   )
 }
