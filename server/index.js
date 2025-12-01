@@ -10,6 +10,11 @@ app.use(cors());
 app.use(express.json());
 app.use("/api", tramosRoute);
 
+/*Solo es de prueba */
+app.get("/api",(req, res) =>{
+    res.json({"users": ["user1", "user2", "User3"]})
+})
+
 app.listen(5000, () => {
     console.log("Server is running port 5000");
 });
