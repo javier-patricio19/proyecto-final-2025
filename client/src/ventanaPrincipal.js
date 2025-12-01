@@ -6,8 +6,6 @@ function VentanaPrincipal() {
     <div>
       <h1>Ventana Principal del Proyecto</h1>
       <p>Bienvenido a la aplicación. Usa el botón para ir al formulario.</p>
-      
-      {/* El componente Link funciona como un <a> pero maneja el enrutamiento interno */}
       <Link to="/llenar-datos">
         <button>
           Ir a llenar datos
