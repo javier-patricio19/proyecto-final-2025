@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {fetchTramos, crearTramos} from '../services/tramosService';
+import {fetchTramos, crearTramos, updateTramo} from '../services/tramosService';
 
 export const useFetchTramos = () => {
     const [tramos, setTramos] = useState([])
@@ -60,5 +60,35 @@ export const useFormTramos = (onSuccessCallback) => {
         encurso,
         error,
         handleSubmit,
+    };
+};
+
+export const useUpdateTramo = (onSuccessCallback) => {
+    const [encursoUpdate, setEncursoUpdate] = useState(false);
+    const [errorUpdate, setErrorUpdate] = useState(null);
+
+    const handleUpdateSubmit = async (event, id, data) => {
+        event.preventDefault();
+        setEncursoUpdate(true);
+        setErrorUpdate(null);
+
+        try {
+            const registroActualizado = await updateTramo(id, data);
+            
+            setEncursoUpdate(false);
+            if (onSuccessCallback) {
+                onSuccessCallback(registroActualizado);
+            }
+
+        } catch (err) {
+            setErrorUpdate(err.message);
+            setEncursoUpdate(false);
+        }
+    };
+
+    return {
+        encursoUpdate,
+        errorUpdate,
+        handleUpdateSubmit,
     };
 };

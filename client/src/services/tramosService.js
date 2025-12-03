@@ -42,3 +42,29 @@ export const crearTramos = async (data) => {
         throw error;
     }
 };
+
+export const updateTramo = async (id, data) => {
+    const update = new Date().toISOString();
+    const dataToSend = {...data, updated_at: update};
+
+    try {
+        const response = await fetch(`/api/editarTramo/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend),
+        });
+        if (!response.ok) {
+            const errorDatos = await response.json();
+            throw new Error(errorDatos.error || 'fallo al actualizar el dato');
+        }
+
+        const updatedRegistro = await response.json();
+        return updatedRegistro;
+
+    } catch (error) {
+        console.error("error en fetch PUT:", error);
+        throw error;
+    }
+}
