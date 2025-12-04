@@ -21,11 +21,11 @@ router.delete("/borrartramo/:id", async (req, res) => {
             id: parseInt(req.params.id),
         },
     });
-    if (!productDeleted) {
-        return res.status(404).json({ error: "Producto no encontrado"});
+    if (!tramoDeleted) {
+        return res.status(404).json({ error: "Tramo no encontrado"});
     }
 
-    return res.json(productDeleted);
+    return res.json(tramoDeleted);
 });
 
 router.put('/editarTramo/:id', async (req, res) => {

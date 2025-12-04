@@ -14,27 +14,26 @@ function Tramos(){
     }
   }, [fetchedTramos]);
 
-  const handleDataChange = (tramoModificado) => {
-    const exits = listaTramos.some(t => t.id === tramoModificado.id);
-
-    if (exits) {
-      setListaTramos(prevlist =>
-        prevlist.map(t => t.id === tramoModificado.id ? tramoModificado : t)
-      );
-      alert("Tramo Actualizado con éxito")
+  const handleDataChange = (tramoModificadoEliminado) => {
+    if (typeof tramoModificadoEliminado === 'object') {
+      const exits = listaTramos.some(t => t.id === tramoModificadoEliminado.id);
+      if (exits) {
+        setListaTramos(prevlist =>
+          prevlist.map(t => t.id === tramoModificadoEliminado.id ? tramoModificadoEliminado : t)
+        );
+        alert("Tramo Actualizado con éxito");
     } else {
-      setListaTramos(prevlist => [...prevlist, tramoModificado]);
+      setListaTramos(prevlist => [...prevlist, tramoModificadoEliminado]);
       alert("Tramo agregado con éxito");
+    }
+    }else if (typeof tramoModificadoEliminado === 'number' || typeof tramoModificadoEliminado === 'string') {
+      const idToDelete = tramoModificadoEliminado;
+      setListaTramos(prevlist => prevlist.filter(t => t.id !== idToDelete));
     }
 
     setEditingTramo(null);
   };
 
-
-  /*const handleNewDataAdded = (tramoNuevo) => {
-    setListaTramos(prevlist => [...prevlist, tramoNuevo]);
-    alert("tramo agregado con éxito");
-  };*/
 
   const handleEditClick = (tramo) => {
     setEditingTramo(tramo); 
@@ -59,6 +58,7 @@ function Tramos(){
         loading={loading} 
         error={error} 
         onEdit={handleEditClick} 
+        onDataChangeCallback={handleDataChange}
       />
       
       <hr />

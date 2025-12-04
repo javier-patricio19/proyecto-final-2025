@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {fetchTramos, crearTramos, updateTramo} from '../services/tramosService';
+import {fetchTramos, crearTramos, updateTramo, deleteTramo} from '../services/tramosService';
 
 export const useFetchTramos = () => {
     const [tramos, setTramos] = useState([])
@@ -90,5 +90,34 @@ export const useUpdateTramo = (onSuccessCallback) => {
         encursoUpdate,
         errorUpdate,
         handleUpdateSubmit,
+    };
+};
+
+export const useDeleteTramo = (onSuccessCallback) => {
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState(null);
+
+    const handleDelete = async (id) => {
+        if (window.confirm(`¿Estás seguro de querer eliminar el tramo ID: ${id}?`)) {
+            setDeleting(true);
+            setDeleteError(null);
+            try {
+                await deleteTramo(id);
+                setDeleting(false);
+                alert("Tramo eliminado con éxito."); 
+                if (onSuccessCallback) {
+                    onSuccessCallback(id);
+                }
+            } catch (err) {
+                setDeleteError(err.message);
+                setDeleting(false);
+                alert(`Error al eliminar: ${err.message}`);
+            }   
+        }
+    };
+    return {
+        deleting,
+        deleteError,
+        handleDelete,
     };
 };

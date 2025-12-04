@@ -67,4 +67,22 @@ export const updateTramo = async (id, data) => {
         console.error("error en fetch PUT:", error);
         throw error;
     }
-}
+};
+
+export const deleteTramo = async (id) => {
+    try {
+        const response = await fetch(`/api/borrartramo/${id}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorDatos = await response.json();
+            throw new Error(errorDatos.error || 'fallo al eliminar el dato');
+        }
+        return {id, message: "eliminado con éxito"};
+
+    } catch (error) {
+        console.error("error en fetch DELETE:", error);
+        throw error;
+    }
+};
