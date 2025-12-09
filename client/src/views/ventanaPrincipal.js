@@ -11,6 +11,11 @@ function VentanaPrincipal() {
           Tramos
         </button>
       </Link>
+      <Link to="/Elementos">
+        <button>
+          Elementos
+        </button>
+      </Link>
     </div>
   );
 }

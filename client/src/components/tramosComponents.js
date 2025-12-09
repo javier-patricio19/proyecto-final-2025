@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {useUpdateTramo, useFormTramos, useDeleteTramo} from '../hooks/tramosHook';
 
 export const ListaTramos = ({tramos, loading, error, onEdit, onDataChangeCallback }) => {
@@ -80,7 +80,7 @@ export const AgregarTramo = ({ onDataAddedCallback}) => {
         </div>
         
         <div>
-          <label sstyle={{display: 'block', marginBottom: '5px'}}>
+          <label style={{display: 'block', marginBottom: '5px'}}>
             destino de tramo:
             <input type='text' value={destino} onChange={(e) => setDestino(e.target.value)} style={inputStyle} required />
           </label>

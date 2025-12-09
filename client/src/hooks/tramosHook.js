@@ -10,7 +10,6 @@ export const useFetchTramos = () => {
         const loadData = async () => {
             try {
                 const data = await fetchTramos();
-                console.log("Hook useFetchTramos: Datos recibidos:", data);
                 setTramos(data);
                 setLoading(false);
             } catch (err) {
@@ -94,30 +93,18 @@ export const useUpdateTramo = (onSuccessCallback) => {
 };
 
 export const useDeleteTramo = (onSuccessCallback) => {
-    const [deleting, setDeleting] = useState(false);
-    const [deleteError, setDeleteError] = useState(null);
-
     const handleDelete = async (id) => {
         if (window.confirm(`¿Estás seguro de querer eliminar el tramo ID: ${id}?`)) {
-            setDeleting(true);
-            setDeleteError(null);
             try {
                 await deleteTramo(id);
-                setDeleting(false);
                 alert("Tramo eliminado con éxito."); 
                 if (onSuccessCallback) {
                     onSuccessCallback(id);
                 }
             } catch (err) {
-                setDeleteError(err.message);
-                setDeleting(false);
                 alert(`Error al eliminar: ${err.message}`);
             }   
         }
     };
-    return {
-        deleting,
-        deleteError,
-        handleDelete,
-    };
+    return { handleDelete };
 };
