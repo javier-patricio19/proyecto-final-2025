@@ -58,11 +58,6 @@ function Elementos() {
                 onEdit={handleEditClick}
                 onDataChangeCallback={handleDataChange}
             />
-
-            <hr />
-            <Link to="/">
-                <button>Volver a ventana principal</button>
-            </Link>
         </div>
     );
 }

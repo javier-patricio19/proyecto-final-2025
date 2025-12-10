@@ -15,43 +15,55 @@ datasource db {
 
 model Tramo{
   id Int @id @default(autoincrement())
-  inicio String
-  destino String
+  inicio String @db.VarChar(100)
+  destino String @db.VarChar(100)
+  observaciones Observacion[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  observaciones Observacion[]
 }
 
 model Elemento{
   id Int @id @default(autoincrement())
-  tipo String @unique
-  nombre String
-  descripcion String?
+  tipo String @db.VarChar(50) 
+  nombre String @db.VarChar(100)
+  descripcion String? @db.Text
+  observaciones Observacion[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  observaciones Observacion[]
-}
-
-model Imagen{
-  id Int @id @default(autoincrement())
-  nombre String
-  ruta String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  observaciones Observacion[]
 }
 
 model Observacion{
   id Int @id @default(autoincrement())
-  clave String
-  kilometro String
-  coordenadas String
-  observaciones String?
-  recomendaciones String?
-  tramo_id Int
+  kilometro String @db.VarChar(50)
+  coordenadas String? @db.VarChar(100)
+  cuerpo String @db.VarChar(20)
+  carril String @db.VarChar(20)
+  fecha DateTime
+  observacion String @db.Text
+  observacion_corta String @db.VarChar(255)
+  recomendacion String @db.Text
+  estado String @db.VarChar(50)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  tramo Tramo @relation(fields: [tramo_id], references: [id])
-  elementos Elemento[]
+
+  tramoId Int
+  tramo Tramo @relation(fields: [tramoId], references: [id])
+
+  elementoId Int
+  elemento Elemento @relation(fields: [elementoId], references: [id])
+
   imagenes Imagen[]
 }
+
+model Imagen{
+  id Int @id @default(autoincrement())
+  nombre String @db.VarChar(100)
+  ruta String @db.VarChar(255)
+
+  observacionId Int
+  observacion Observacion @relation(fields: [observacionId], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
