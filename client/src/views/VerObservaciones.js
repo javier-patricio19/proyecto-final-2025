@@ -13,7 +13,8 @@ function VerObservaciones() {
      }, [fetchedObservaciones]);
 
     const handleDataChange = (dataModifiedOrId) => {
-        if (typeof dataModifiedOrId === 'number' || typeof dataModifiedOrId === 'string') {                const idToDelete = dataModifiedOrId;
+        if (typeof dataModifiedOrId === 'number' || typeof dataModifiedOrId === 'string') {
+            const idToDelete = dataModifiedOrId;
             setListaObservaciones(prevList => prevList.filter(item => item.id !== idToDelete));
         }
     };
@@ -24,7 +25,7 @@ function VerObservaciones() {
     };
 
     return (
-        <div>
+        <div style={{padding: '20px'}}>
             <h1>Gestión de Observaciones</h1>
             <ListaObservaciones
                 observaciones={listaObservaciones}

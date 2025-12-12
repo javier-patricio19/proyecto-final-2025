@@ -61,7 +61,7 @@ model Imagen{
   ruta String @db.VarChar(255)
 
   observacionId Int
-  observacion Observacion @relation(fields: [observacionId], references: [id])
+  observacion Observacion @relation(fields: [observacionId], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

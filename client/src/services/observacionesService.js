@@ -43,7 +43,7 @@ export const updateObservacion = async (id, data) => {
 
 export const deleteObservacion = async (id) => {
     try {
-        const response = await fetch(`/api/eliminarObservacion/${id}`, {
+        const response = await fetch(`/api/borrarObservacion/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Error al eliminar la observación');

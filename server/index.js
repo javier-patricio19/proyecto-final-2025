@@ -9,6 +9,9 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+app.use('/images', express.static('images'));
+
 app.use("/api", tramosRoute);
 app.use("/api", elementosRoute);
 app.use("/api", observacionesRoute);
