@@ -1,11 +1,13 @@
 import React,{ useState, useEffect } from "react";
 import { useFetchObservaciones } from "../hooks/observacionesHooks";
 import { ListaObservaciones } from "../components/observacionesComponents";
+import { useNavigate } from "react-router-dom";
 
 function VerObservaciones() {
     const { observaciones: fetchedObservaciones, loading, error } = useFetchObservaciones();
     const [listaObservaciones, setListaObservaciones] = useState([]);
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         if (fetchedObservaciones) {
             setListaObservaciones(fetchedObservaciones);
@@ -20,8 +22,7 @@ function VerObservaciones() {
     };
 
     const handreEditClick = (observacion) => {
-        console.log('Editar observación:', observacion.id);
-        alert(`Funcionalidad de edición por aplicar`);
+        navigate(`/editarObservaciones/${observacion.id}`);
     };
 
     return (

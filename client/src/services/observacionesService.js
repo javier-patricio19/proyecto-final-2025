@@ -30,8 +30,7 @@ export const updateObservacion = async (id, data) => {
     try {
         const response = await fetch(`/api/editarObservacion/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: data,
         });
         if (!response.ok) { throw new Error('Error al actualizar la observación'); }
         return response.json();
@@ -53,3 +52,28 @@ export const deleteObservacion = async (id) => {
         throw error;
     }
 };
+
+export const fetchObservacionById =async (id) => {
+    try {
+        const response = await fetch(`/api/verObservacion/${id}`);
+        if (!response.ok) throw new Error(`Error, Estado: ${response.status}`);
+        return response.json();
+    } catch (error) {
+        console.error("Error en fetchObservacionById: ", error);
+        throw error;
+    }
+};
+
+export const deleteImagen = async (id) => {
+    try {
+        const response = await fetch(`/api/borrarImagen/${id}`,{
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Error al eliminar la imagen');
+        return {id, message: 'Imagen eliminada correctamente'};
+    } catch (error) {
+        console.error('Imagen eliminada correctamente');
+        throw error;
+    }
+};
+

@@ -5,6 +5,7 @@ import Tramos from './views/Tramos';
 import Elementos from "./views/Elementos";
 import AgregarObservacion from './views/AgregarObservacion';
 import VerObservaciones from "./views/VerObservaciones";
+import EditarObservaciones from './views/EditarObservacion';
 import { Navbar, DashboardLayout } from './components/layout';
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
         <Route path="/observacion" element={<AgregarObservacion />} />
         {/*Ruta para Gestionar Observaciones*/}
         <Route path="VerObservaciones" element={<VerObservaciones />} />
+        {/*Ruta para Editar observaciones*/}
+        <Route path="editarObservaciones/:id" element={<EditarObservaciones />} />
         {/*Rutas de Gestión*/}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Tramos />} />
