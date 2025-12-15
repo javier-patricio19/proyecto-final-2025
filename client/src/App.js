@@ -7,6 +7,7 @@ import AgregarObservacion from './views/AgregarObservacion';
 import VerObservaciones from "./views/VerObservaciones";
 import EditarObservaciones from './views/EditarObservacion';
 import { Navbar, DashboardLayout } from './components/layout';
+import GaleriaImagenes from "./views/GaleriaImagenes";
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="VerObservaciones" element={<VerObservaciones />} />
         {/*Ruta para Editar observaciones*/}
         <Route path="editarObservaciones/:id" element={<EditarObservaciones />} />
+        {/*Ruta para Ver Imagenes*/}
+        <Route path="/imagenes" element={<GaleriaImagenes />} />
         {/*Rutas de Gestión*/}
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Tramos />} />

@@ -14,6 +14,9 @@ const Navbar = () => {
             <Link to="/verObservaciones" style={{color: 'white', textDecoration: 'none', fontSize: '1.2em'}}>
                 Ver Observaciones
             </Link>
+            <Link to="/imagenes" style={{color: 'white', textDecoration: 'none', fontSize: '1.2em'}}>
+                Galería de Imágenes
+            </Link>
             <Link to="/dashboard" style={{color: 'white', textDecoration: 'none', fontSize: '1.2em'}}>
                 Gestión
             </Link>
