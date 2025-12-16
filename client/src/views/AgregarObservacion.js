@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { CrearObservacionForm } from "../components/observacionesComponents";
+import { toast } from 'react-toastify';
 
 function AgregarObservacion() {
     const navigate = useNavigate();
 
     const handleSuccess = (nuevaObservacion) => {
         console.log("handleSuccess ejecutado. Navegando a ver-observaciones.");
-        alert(`Observación creada con Exito.`);
+        toast.success(`Observación creada con Exito.`);
         navigate("/verObservaciones");
     };
 

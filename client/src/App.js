@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import VentanaPrincipal from './views/ventanaPrincipal';
+import { Slide, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import Dashboard from './views/Dashboard';
 import Tramos from './views/Tramos';
 import Elementos from "./views/Elementos";
 import AgregarObservacion from './views/AgregarObservacion';
@@ -13,10 +15,9 @@ function App() {
   return (
     <Router>
       <Navbar />
-
       <Routes>
         {/* Ruta principal */}
-        <Route path="/" element={<VentanaPrincipal />} />
+        <Route path="/" element={<Dashboard />} />
         {/*Ruta de Agregar Obsrvación*/}
         <Route path="/observacion" element={<AgregarObservacion />} />
         {/*Ruta para Gestionar Observaciones*/}
@@ -32,6 +33,7 @@ function App() {
           <Route path="Elementos" element={<Elementos />} />
         </Route>
       </Routes>
+      <ToastContainer position='top-right' autoClose={1500} theme='light' transition={Slide} closeOnClick newestOnTop />
     </Router>
   );
 }

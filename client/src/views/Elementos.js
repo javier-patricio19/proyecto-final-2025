@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useFetchElementos } from "../hooks/elementosHook";
 import { ListaElementos, AgregarElemento, EditarElemento } from "../components/elementosComponents";
+import { toast } from 'react-toastify';
 
 function Elementos() {
     const { elementos: fetchedElementos, loading, error } = useFetchElementos();
@@ -21,10 +22,10 @@ function Elementos() {
                 setListaElementos((prevlist) =>
                     prevlist.map((t) => t.id === elementoModificadoEliminado.id ? elementoModificadoEliminado : t)
                 );
-                alert("Elemento Actualizado con éxito");
+                toast.success("Elemento Actualizado con éxito");
             } else {
                 setListaElementos((prevlist) => [...prevlist, elementoModificadoEliminado]);
-                alert("Elemento agregado con éxito");
+                toast.success("Elemento agregado con éxito");
             }
         } else if (typeof elementoModificadoEliminado === "number" || typeof elementoModificadoEliminado === "string") {
             const idToDelete = elementoModificadoEliminado;

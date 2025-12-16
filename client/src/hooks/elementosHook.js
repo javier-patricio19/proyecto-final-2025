@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import { fetchElementos, crearElemento, updateElemento, deleteElemento } from "../services/elementosService";
+import { toast } from 'react-toastify';
 
 export const useFetchElementos = () => {
   const [elementos, setElementos] = useState([]);
@@ -71,13 +73,21 @@ export const useUpdateElemento = (onSuccessCallback) => {
 
 export const useDeleteElemento = (onSuccessCallback) => {
     const handleDelete = async (id) => {
-        if (window.confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Se eliminará el elemento ID: ${id}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar'
+        });
+        if (result.isConfirmed) {
             try {
                 await deleteElemento(id);
-                alert("Elemento eliminado correctamente.");
+                toast.info("Elemento eliminado correctamente.");
                 if (onSuccessCallback) onSuccessCallback(id);
             } catch (err) {
-                alert(`Error al eliminar el elemento: ${err.message}`);
+                toast.error(`Error al eliminar el elemento: ${err.message}`);
             }
         }
     };

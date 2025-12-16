@@ -3,6 +3,7 @@ import { prisma } from "../db.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { count } from "console";
 
 const router = express.Router();
 
@@ -133,6 +134,7 @@ router.put("/editarObservacion/:id", upload.array('imagenes', 10), async (req, r
         const observacionUpdated = await prisma.observacion.update({
             where: {id: observacionId},
             data: datosActualizar,
+            include: { imagenes: true }
         });
 
         if (archivosNuevos && archivosNuevos.length > 0) {
@@ -187,6 +189,36 @@ router.delete("/borrarImagen/:id", async (req, res) => {
     } catch (error) {
         console.error("Error al borrar la imagen:", error);
         res.status(500).json({error: "error interno del servidor al eliminar la imagen."});
+    }
+});
+
+router.delete("/borrarMultiple", async (req, res) => {
+    try {
+        const {ids} =req.body;
+
+        if (!ids || !Array.isArray(ids)) {
+            return res.status(400).json({ error: "Se requiere un array de IDs" });
+        }
+
+        const imagenes = await prisma.imagen.findMany({
+            where: {observacionId: {in: ids}}
+        });
+
+        imagenes.forEach(img => {
+            const ruta = path.join(process.cwd(), 'images', path.basename(img.ruta));
+            if(fs.existsSync(ruta)) fs.unlinkSync(ruta);
+        });
+
+        const deleted = await prisma.observacion.deleteMany({
+            where: {
+                id: {in: ids}
+            }
+        });
+
+        res.json({ message: `${deleted.count} observaciones eliminadas`, count: deleted.count });
+    } catch (error) {
+        console.error("Error en borrarMultiple:", error);
+        res.status(500).json({ error: "Error al eliminar múltiples registros"});
     }
 });
 

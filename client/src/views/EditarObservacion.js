@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { EditarObservacion } from "../components/observacionesComponents";
+import { toast } from 'react-toastify';
 
 function EditarObservaciones(){
     const navigate = useNavigate();
     const {id} = useParams();
 
     const handleSuccess = (observacionActualizada) => {
-        alert(`Observacion ${observacionActualizada.id} actualizada con éxito`);
+        toast.success(`Observacion ${observacionActualizada.id} actualizada con éxito`);
         navigate("/verObservaciones");
     };
 

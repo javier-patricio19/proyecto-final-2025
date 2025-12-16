@@ -1,5 +1,28 @@
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import { fetchObservaciones, updateObservacion, deleteObservacion, crearObservacion, fetchObservacionById, deleteImagen } from "../services/observacionesService";
+import { toast } from 'react-toastify';
+
+export const useFetchObservaciones = () => {
+    const [observaciones, setObservaciones] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await fetchObservaciones();
+                setObservaciones(data);
+                setLoading(false);
+            } catch (err) {
+                setError(err);
+                setLoading(false);
+            }
+        };
+        loadData();
+    }, []);
+    return { observaciones, loading, error };
+};
 
 export const useObservacionForm = (onSuccessCallback) => {
     const [tramoId, setTramoId] = useState('');
@@ -61,27 +84,6 @@ export const useObservacionForm = (onSuccessCallback) => {
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, imagenes, setImagenes,
         encurso, errorEnvio, handleSubmit
     };
-};
-
-export const useFetchObservaciones = () => {
-    const [observaciones, setObservaciones] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                const data = await fetchObservaciones();
-                setObservaciones(data);
-                setLoading(false);
-            } catch (err) {
-                setError(err);
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, []);
-    return { observaciones, loading, error };
 };
 
 export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
@@ -185,13 +187,22 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
 
 export const useDeleteObservacion = (onSuccessCallback) => {
     const handleDelete = async (id) => {
-        if (window.confirm(`¿Estás seguro de que deseas eliminar esta observación ID: ${id}?`)) {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Se eliminará la observación ID: ${id}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar'
+        });
+
+        if (result.isConfirmed) {
             try {
                 await deleteObservacion(id);
-                alert("Observación eliminado correctamente.");
+                toast.info("Observación eliminado correctamente.");
                 if (onSuccessCallback) onSuccessCallback(id);
             } catch (err) {
-                alert(`Error al eliminar la observación: ${err.message}`);
+                toast.error(`Error al eliminar la observación: ${err.message}`);
             }
         }
     };

@@ -77,3 +77,34 @@ export const deleteImagen = async (id) => {
     }
 };
 
+export const deleteMultipleObservaciones = async (ids) => {
+    try {
+        const response = await fetch("/api/borrarMultiple", {
+            method:'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids }),
+        });
+        if (!response.ok) throw new Error('Error al eliminar múltiples observaciones');
+        return await response.json();
+
+    } catch (error) {
+        console.error('Error en deleteMultipleObservaciones:', error);
+        throw error;
+    }
+}
+
+export const actualizarEstadoObservacion = async (id, nuevoEstado) => {
+    try {
+        const response = await fetch(`/api/editarObservacion/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: nuevoEstado }),
+        });
+        if (!response.ok) throw new Error('Error al actualizar el estado');
+        return await response.json();
+    } catch (error) {
+        console.error('Error en actualizarEstadoObservacion:', error);
+        throw error;
+    }
+};
+

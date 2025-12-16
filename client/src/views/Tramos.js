@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {Link} from 'react-router-dom';
 import {useFetchTramos} from '../hooks/tramosHook';
 import { ListaTramos, AgregarTramo, EditarTramo } from '../components/tramosComponents';
+import { toast } from 'react-toastify';
 
 function Tramos(){
   const { tramos: fetchedTramos, loading, error } = useFetchTramos();
@@ -21,10 +22,10 @@ function Tramos(){
         setListaTramos(prevlist =>
           prevlist.map(t => t.id === tramoModificadoEliminado.id ? tramoModificadoEliminado : t)
         );
-        alert("Tramo Actualizado con éxito");
+        toast.success("Tramo Actualizado con éxito");
     } else {
       setListaTramos(prevlist => [...prevlist, tramoModificadoEliminado]);
-      alert("Tramo agregado con éxito");
+      toast.success("Tramo agregado con éxito");
     }
     }else if (typeof tramoModificadoEliminado === 'number' || typeof tramoModificadoEliminado === 'string') {
       const idToDelete = tramoModificadoEliminado;

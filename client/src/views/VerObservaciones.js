@@ -15,9 +15,16 @@ function VerObservaciones() {
      }, [fetchedObservaciones]);
 
     const handleDataChange = (dataModifiedOrId) => {
-        if (typeof dataModifiedOrId === 'number' || typeof dataModifiedOrId === 'string') {
+        if (typeof dataModifiedOrId === 'object' && dataModifiedOrId !== null ) {
             const idToDelete = dataModifiedOrId;
-            setListaObservaciones(prevList => prevList.filter(item => item.id !== idToDelete));
+            setListaObservaciones((prevList) => 
+                prevList.map((item) =>
+                    item.id === dataModifiedOrId.id ? dataModifiedOrId : item
+                )
+            );
+        } else {
+            const idToDelete = dataModifiedOrId;
+            setListaObservaciones((prevList) => prevList.filter((item) => item.id !== idToDelete));
         }
     };
 

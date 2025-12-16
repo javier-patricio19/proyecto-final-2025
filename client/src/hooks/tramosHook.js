@@ -1,5 +1,7 @@
 import {useState, useEffect} from 'react';
+import Swal from "sweetalert2";
 import {fetchTramos, crearTramos, updateTramo, deleteTramo} from '../services/tramosService';
+import { toast } from 'react-toastify';
 
 export const useFetchTramos = () => {
     const [tramos, setTramos] = useState([])
@@ -94,15 +96,23 @@ export const useUpdateTramo = (onSuccessCallback) => {
 
 export const useDeleteTramo = (onSuccessCallback) => {
     const handleDelete = async (id) => {
-        if (window.confirm(`¿Estás seguro de querer eliminar el tramo ID: ${id}?`)) {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Se eliminará el tramo ID: ${id}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar'
+        });
+        if (result.isConfirmed) {
             try {
                 await deleteTramo(id);
-                alert("Tramo eliminado con éxito."); 
+                toast.info("Tramo eliminado con éxito."); 
                 if (onSuccessCallback) {
                     onSuccessCallback(id);
                 }
             } catch (err) {
-                alert(`Error al eliminar: ${err.message}`);
+                toast.error(`Error al eliminar: ${err.message}`);
             }   
         }
     };

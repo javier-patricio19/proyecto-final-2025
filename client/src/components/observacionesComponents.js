@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDeleteObservacion, useObservacionForm, useUpdateObservacion } from '../hooks/observacionesHooks';
 import { useFetchTramos } from "../hooks/tramosHook";
 import { useFetchElementos } from "../hooks/elementosHook";
-import { fetchObservacionById } from "../services/observacionesService";
+import { deleteMultipleObservaciones, fetchObservacionById, actualizarEstadoObservacion } from "../services/observacionesService";
+import { generarReportePDF,obtenerPreviewPDF,descargarPDF } from "../services/reporteService";
+import PDFPreviewModal from "./PDFPreviewModal";
+import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 
 const cardStyle = {
     display: 'flex',
@@ -150,10 +154,14 @@ const ObservacionModal = ({observacionId, onClose}) => {
 export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDataChangeCallback }) => {
     const { handleDelete } = useDeleteObservacion(onDataChangeCallback);
     const [expandedObsId, setExpandedObsId] = useState(null);
-
+    const [selectedIds, setSelectedIds] = useState([]);
     const [filterTramo, setFilterTramo] = useState('Todos');
     const [filterElemento, setFilterElemento] = useState('Todos');
     const [filterEstado, setFilterEstado] = useState('Todos');
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [tempObs, setTempObs] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('fecha_desc');
 
     const {tramos} = useFetchTramos();
     const {elementos} = useFetchElementos();
@@ -161,16 +169,115 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
 
     if (loading) return <p>Cargando observaciones...</p>;
     if (error) return <p style={{ color: 'red' }}>Error: {error.nessage}</p>;
+    const handleVerPreview = async (seleccion) => {
+         try {
+            const url = await obtenerPreviewPDF(seleccion); 
+            if(url){
+                setPreviewUrl(url);
+                setTempObs(seleccion);
+            }
+        } catch (error) {
+            console.error("Error crítico al generar PDF:", error);
+            toast.error("Error al procesar las imágenes para el PDF");
+        }
+    };
+
+    const toggleSelect = (id) =>{
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i!== id) : [...prev,id]
+        );
+    };
+
+    const handleBulkDelete = async () => {
+        const result = await Swal.fire({
+             title: '¿Eliminar selección?',
+            text: `Se borrarán ${selectedIds.length} observaciones permanentemente.`,
+            icon: 'danger',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, borrar todo',
+            confirmButtonColor: '#d33'
+        });
+
+        if (result.isConfirmed) {
+            try {
+            await deleteMultipleObservaciones(selectedIds);
+            selectedIds.forEach(id => {
+                if (onDataChangeCallback) onDataChangeCallback(id);
+            });
+            setSelectedIds([]); 
+            toast.info("Eliminación masiva completada con éxito.");
+        } catch (error) {
+            toast.error("Hubo un error al procesar la eliminación masiva.");
+        }
+    }
+    };
 
     const safeTramos = tramos || [];
     const safeElementos = elementos || [];
 
-    const filteredObservaciones = observaciones.filter(item => {
+    let processedData = observaciones.filter(item => {
         const matchesTramo = filterTramo === 'Todos' || item.tramoId === parseInt(filterTramo);
         const matchesElemento = filterElemento === 'Todos' || item.elementoId === parseInt(filterElemento);
         const matchesEstado = filterEstado === 'Todos' || item.estado === filterEstado;
-        return matchesTramo && matchesElemento && matchesEstado;
+        const busqueda = searchTerm.toLowerCase();
+        const matchesSearch =
+            item.observacion.toLowerCase().includes(busqueda) ||
+            item.observacion_corta.toLowerCase().includes(busqueda) ||
+            item.kilometro.toLowerCase().includes(busqueda) ||
+            item.recomendacion.toLowerCase().includes(busqueda);
+        return matchesTramo && matchesElemento && matchesEstado && matchesSearch;
     });
+
+    processedData.sort((a, b) => {
+        switch(sortBy){
+            case 'fecha_desc': return new Date(b.fecha) - new Date(a.fecha);
+            case 'fecha_asc': return new Date(a.fecha) - new Date(b.fecha);
+            case 'km_asc': return parseFloat(a.kilometro) - parseFloat(b.kilometro);
+            case 'km_desc': return parseFloat(b.kilometro) - parseFloat(a.kilometro);
+            case 'id_desc': return b.id - a.id;
+            case 'id_asc': return a.id - b.id;
+            default: return 0;
+        } 
+    });
+
+    const handleCambiarEstado = async (item) => {
+        const { value: nuevoEstado } = await Swal.fire({
+            title: 'Actualizar Estado',
+            input: 'select',
+            inputOptions: {
+                'Reportado': 'Reportado',
+                'En proceso': 'En proceso',
+                'Completado': 'Completado'
+            },
+            inputValue: item.estado,
+            showCancelButton: true,
+            confirmButtonText: 'Actualizar',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (value) => {
+                if (value === item.estado) return 'Selecciona un estado diferente';
+            }
+        });
+
+        if (nuevoEstado) {
+            try {
+                const actualizado = await actualizarEstadoObservacion(item.id, nuevoEstado);
+                const objetoCompleto = {...item, ...actualizado }
+                onDataChangeCallback(objetoCompleto); 
+                toast.success(`Estado actualizado a: ${nuevoEstado}`);
+            } catch (error) {
+                toast.error("No se pudo actualizar el estado");
+            }
+        }
+    };
+
+    const searchInputStyle = {
+        padding: '10px',
+        width: '100%',
+        marginBottom: '15px',
+        borderRadius: '5px',
+        border: '1px solid #ccc',
+        fontSize: '1em'
+    };
 
     const getStatusStyle = (estado) => {
         if (estado === 'Sin atender' || estado === 'Reportado') {
@@ -191,6 +298,13 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
     return (
         <div>
             <h2>Lista de Obsevaciones: {observaciones.length} elementos</h2>
+            <input 
+                type="text"
+                placeholder=" Buscar por descripción, kilómetro, recomendación..."
+                style={searchInputStyle}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <div style={filterContainerStyle}>
                 <select onChange={(e) => setFilterTramo(e.target.value)} value={filterTramo} style={{padding: '8px'}}>
                     <option value="Todos">Todos los tramos</option>
@@ -205,47 +319,92 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
                 <select onChange={(e) => setFilterEstado(e.target.value)} value={filterEstado} style={{padding: '8px'}}>
                     {estados.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
+                    <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: '8px' }}>
+                    <option value="fecha_desc">Fecha (Más reciente)</option>
+                    <option value="fecha_asc">Fecha (Más antigua)</option>
+                    <option value="km_asc">Kilómetro (Menor a Mayor)</option>
+                    <option value="km_desc">Kilómetro (Mayor a Menor)</option>
+                    <option value="id_desc">ID (Más reciente)</option>
+                    <option value="id_asc">ID (Más Antiguo)</option>
+                </select>
+                <button 
+                    onClick={() => {setSearchTerm(''); setFilterTramo('Todos'); setFilterElemento('Todos'); setFilterEstado('Todos');}}
+                    style={{padding: '8px', cursor: 'pointer'}}
+                >
+                    Limpiar
+                </button>
             </div>
-
-            {filteredObservaciones.map(item =>(
-                <div key={item.id} style={cardStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={{ width: '60px', height:'60px', background: '#ccc', borderRadius: '4px', marginRight: '15px'}}>
-                            {item.imagenes && item.imagenes.length > 0 ? (
-                                console.log("Cargando imagen desde URL:", `http://localhost:5000${item.imagenes[0].ruta}`),
-                                <img
-                                    src={`${item.imagenes[0].ruta}`}
-                                    alt={item.observacion_corta}
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                />
-                            ) : (
-                                <p style={{fontSize: '0.6em', textAlign: 'center', marginTop: '15px'}}>Sin imagen</p>
-                            )} 
-                        </div>
-                        <div>
-                            <span style={getStatusStyle(item.estado)}>{item.estado}</span>
-                            <p style={{  margin: '5px 0 2px 0', fontWeight: 'bold' }}>Tramo: {getTramoNombre(item.tramoId)}</p>
-                            <p style={{ margin: '0', fontSize: '0.9em', color: '#555' }}>
-                                Kilometro: {item.kilometro} Cuerpo: {item.cuerpo} Carril: {item.carril} Elemento: {getElementoNombre(item.elementoId)}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <button
-                            onClick={() => setExpandedObsId(item.id)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2em' }}
-                            title="Ver detalles conmpletos">
-                                🔍
-                        </button>
-                        <ActionDrop item={item} onEdit={onEdit} onDelete={handleDelete} />
+            {selectedIds.length > 0 && (
+                <div style={{ position: 'sticky', top: '10px', backgroundColor: '#333', color: 'white', padding: '15px', borderRadius: '8px', zIndex: 500, display: 'flex', justifyContent: 'space-between', marginBottom: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' }}>
+                    <span>{selectedIds.length} observaciones seleccionadas</span>
+                    <div>
+                         <button onClick={() => handleVerPreview(observaciones.filter(o => selectedIds.includes(o.id)))}>Ver Reporte Grupal</button>
+                        <button onClick={handleBulkDelete} style={{ backgroundColor: 'red', color: 'white', cursor: 'pointer' }}>Eliminar Seleccionadas</button>
+                        <button onClick={() => setSelectedIds([])} style={{ marginLeft: '10px', background: 'none', color: 'white', border: '1px solid white', cursor: 'pointer' }}>Cancelar</button>
                     </div>
                 </div>
-            ))}
+            )}
+            {processedData.length > 0 ? (
+                processedData.map(item =>(
+                    <div key={item.id} style={cardStyle}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedIds.includes(item.id)}
+                                onChange={() => toggleSelect(item.id)}
+                                style={{marginRight: '15px', width: '20px', height: '20px', cursor: 'pointer'}}
+                            />
+                            <div style={{ width: '60px', height:'60px', background: '#ccc', borderRadius: '4px', marginRight: '15px'}}>
+                                {item.imagenes && item.imagenes.length > 0 ? (
+                                    console.log("Cargando imagen desde URL:", `http://localhost:5000${item.imagenes[0].ruta}`),
+                                    <img
+                                        src={`${item.imagenes[0].ruta}`}
+                                        alt={item.observacion_corta}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <p style={{fontSize: '0.6em', textAlign: 'center', marginTop: '15px'}}>Sin imagen</p>
+                                )} 
+                            </div>
+                            <div>
+                                <span  onClick={() => handleCambiarEstado(item)} style={{ ...getStatusStyle(item.estado), cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', userSelect: 'none'}} title="Clic para cambiar estado rápido">✎{item.estado}</span>
+                                <p style={{  margin: '5px 0 2px 0', fontWeight: 'bold' }}>Tramo: {getTramoNombre(item.tramoId)}</p>
+                                <p style={{ margin: '0', fontSize: '0.9em', color: '#555' }}>
+                                    Kilometro: {item.kilometro} Cuerpo: {item.cuerpo} Carril: {item.carril} Elemento: {getElementoNombre(item.elementoId)}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <button onClick={() => handleVerPreview([item])} style={{ background: 'none', border: 'none', cursor: 'pointer' }} title="Descargar PDF Individual">
+                                📄
+                            </button>
+                            <button
+                                onClick={() => setExpandedObsId(item.id)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2em' }}
+                                title="Ver detalles conmpletos">
+                                    🔍
+                            </button>
+                            <ActionDrop item={item} onEdit={onEdit} onDelete={handleDelete} />
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p style={{textAlign: 'center', padding: '20px', color: '#888'}}>
+                    No se encontraron resultados para los filtros aplicados.
+                </p>
+            )}
             {expandedObsId && (
                 <ObservacionModal
                     observacionId={expandedObsId}
                     onClose={() => setExpandedObsId(null)}
+                />
+            )}
+            {previewUrl && (
+                <PDFPreviewModal 
+                    pdfUrl={previewUrl} 
+                    onClose={() => { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }}
+                    onDownload={() => descargarPDF(tempObs)}
                 />
             )}
         </div>
