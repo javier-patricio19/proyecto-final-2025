@@ -37,6 +37,26 @@ export const useObservacionForm = (onSuccessCallback) => {
     const [encurso, setEncurso] = useState(false);
     const [errorEnvio, setErrorEnvio] = useState(null);
     const [imagenes, setImagenes] = useState(null);
+    const [lat, setLat] = useState('');
+    const [lng, setLng] = useState('');
+
+    const obtenerUbicacionGPS = () => {
+        if (!navigator.geolocation) {
+            toast.error("Tu navegador no soporta geolocalización");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setLat(pos.coords.latitude);
+                setLng(pos.coords.longitude);
+                toast.success("Ubicación capturada con éxito");
+            },
+            (error) => {
+                toast.error("Error al obtener ubicación: " + error.message);
+            }
+        );
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -59,6 +79,8 @@ export const useObservacionForm = (onSuccessCallback) => {
         formData.append('observacion_corta', observacionCorta);
         formData.append('recomendacion', recomendacion);
         formData.append('estado', 'Reportado');
+        formData.append('lat', lat);
+        formData.append('lng', lng);
 
         for (let i = 0; i < imagenes.length; i++) {
             formData.append('imagenes', imagenes[i]);
@@ -82,7 +104,7 @@ export const useObservacionForm = (onSuccessCallback) => {
         tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, imagenes, setImagenes,
-        encurso, errorEnvio, handleSubmit
+        encurso, errorEnvio, lat, setLat, lng, setLng, obtenerUbicacionGPS, handleSubmit
     };
 };
 
@@ -100,6 +122,8 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
     const [imagenesNuevas, setImagenesNuevas] = useState(null); 
     const [imagenesExistentes, setImagenesExistentes] = useState([]);
     const [imagenesEliminarIds, setImagenesEliminarIds] = useState([]);
+    const [lat, setLat] = useState('');
+    const [lng, setLng] = useState('');
 
     const [encurso, setEncurso] = useState(false);
     const [errorEnvio, setErrorEnvio] = useState(null);
@@ -125,6 +149,8 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
                 setRecomendacion(data.recomendacion);
                 setEstado(data.estado);
                 setImagenesExistentes(data.imagenes || []);
+                setLat(data.lat || '');
+                setLng(data.lng || '');
                 setLoadingData(false);
             } catch (err) {
                 setErrorEnvio("No se pudieron cargar los datos de la observación para editar.");
@@ -133,6 +159,14 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
         };
         loadObservacionData();
     }, [observacionId]);
+
+    const obtenerUbicacionGPS = () => {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition((pos) => {
+            setLat(pos.coords.latitude);
+            setLng(pos.coords.longitude);
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -158,6 +192,8 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
         formData.append('observacion', observacion);
         formData.append('observacion_corta', observacionCorta);
         formData.append('recomendacion', recomendacion);
+        formData.append('lat', lat);
+        formData.append('lng', lng);
         formData.append('estado', estado);
 
         if(imagenesNuevas && imagenesNuevas.length > 0) {
@@ -181,7 +217,7 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, 
         estado, setEstado, imagenesNuevas, setImagenesNuevas, imagenesExistentes, handleRemoveExistingImage,
-        encurso, errorEnvio, handleSubmit, loadingData
+        encurso, errorEnvio, lat, setLat, lng, setLng, obtenerUbicacionGPS, handleSubmit, loadingData
     };
 };
 

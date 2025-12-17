@@ -1,4 +1,10 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
+import { useLocation } from "react-router-dom";
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useFetchObservaciones } from "../hooks/observacionesHooks";
 import { useFetchElementos } from "../hooks/elementosHook";
 import { useFetchTramos } from "../hooks/tramosHook";
@@ -14,12 +20,49 @@ import {
     Title,
  } from "chart.js";
 
- ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    iconRetinaUrl: iconRetina,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function RecenterMap({ coords, zoom }) {
+    const map = useMap();
+    useEffect(() => {
+        if (coords && coords[0] && coords[1]) {
+            map.setView(coords, zoom || 13);
+        }
+    }, [coords, zoom, map]);
+    return null;
+}
 
  function Dashboard() {
     const { observaciones, loading, error } = useFetchObservaciones();
     const { elementos, loading: loadElem } = useFetchElementos();
     const { tramos, loading: loadTramo } = useFetchTramos();
+    const location = useLocation();
+    const mapaRef = useRef(null);
+
+    const defaultCenter = [23.70018665574605, -102.38329038465977];
+    const defaultZoom = 5;
+    const query = new URLSearchParams(location.search);
+    const urlLat = parseFloat(query.get('lat'));
+    const urlLng = parseFloat(query.get('lng'));
+    const urlZoom = parseInt(query.get('zoom'));
+    const urlId = parseInt(query.get('id'));
+
+    const currentCenter = (urlLat && urlLng) ? [urlLat, urlLng] : defaultCenter;
+    const currentZoom = urlZoom || defaultZoom;
+
 
     const totalObservaciones = observaciones ? observaciones.length : 0;
     const totalImagenes = observaciones ? observaciones.reduce((acc, obs) => acc + (obs.imagenes?.length || 0), 0) : 0;
@@ -31,8 +74,27 @@ import {
         };
     }) || [];
 
+     useEffect(() => {
+        if (urlId && mapaRef.current) {
+            setTimeout(() => {
+                mapaRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center'
+                });
+            }, 500); 
+        }
+    }, [urlId, loading]);
+
     if (loading) return <p style={{padding: '20px'}}>Cargando estadísticas...</p>;
     if (error) return <p>Error al cargar datos.</p>;
+
+    const puntosMapa = observaciones?.map(obs => ({
+        ...obs,
+        lat: obs.lat || 19.4326 + (parseFloat(obs.kilometro) / 100),
+        lng: obs.lng || -99.1332
+    })) || [];
+
+
 
     const conteoEstados = {
         'Reportado' : observaciones.filter(o => o.estado === 'Reportado').length,
@@ -83,21 +145,7 @@ import {
         }
     };
 
-    const gridSummaryStyle = {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '40px'
-    };
 
-    const cardStyle = (color) => ({
-        padding: '20px',
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-        borderTop: `5px solid ${color}`,
-        textAlign: 'center'
-    });
 
     const gridContainerStyle = {
         display: 'grid',
@@ -192,6 +240,39 @@ import {
                     </div>
                 </div>
             </div>
+            <div style={{ padding: '30px' }}>
+            {/* ... tus tarjetas y gráficas ... */}
+
+            <h2 style={{ marginBottom: '20px' }}>Geolocalización de Afectaciones</h2>
+            <div ref={mapaRef} style={{ height: '500px', width: '100%', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <MapContainer center={currentCenter} zoom={currentZoom} style={{ height: '500px', width: '100%' }}>
+                    <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="www.openstreetmap.org">OpenStreetMap</a>'
+                    />
+                    <RecenterMap coords={currentCenter} zoom={currentZoom} />
+                    {puntosMapa.map(punto => (
+                        <Marker 
+                            key={punto.id} 
+                            position={[punto.lat, punto.lng]}
+                            eventHandlers={{
+                                add: (e) => {
+                                    if (punto.id === urlId) e.target.openPopup();
+                                }
+                            }}
+                            >
+                            <Popup>
+                                <strong>ID #{punto.id}</strong><br />
+                                {punto.observacion_corta}<br />
+                                <span style={{color: punto.estado === 'Completado' ? 'green' : 'red'}}>
+                                    Estado: {punto.estado}
+                                </span>
+                            </Popup>
+                        </Marker>
+                    ))}
+                </MapContainer>
+            </div>
+        </div>
         </div>
     );
  }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDeleteObservacion, useObservacionForm, useUpdateObservacion } from '../hooks/observacionesHooks';
 import { useFetchTramos } from "../hooks/tramosHook";
 import { useFetchElementos } from "../hooks/elementosHook";
@@ -162,6 +163,7 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
     const [tempObs, setTempObs] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState('fecha_desc');
+    const Navigate = useNavigate();
 
     const {tramos} = useFetchTramos();
     const {elementos} = useFetchElementos();
@@ -169,6 +171,15 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
 
     if (loading) return <p>Cargando observaciones...</p>;
     if (error) return <p style={{ color: 'red' }}>Error: {error.nessage}</p>;
+    
+    const verEnMapa = (item) => {
+        if (!item.lat || !item.lng) {
+            toast.info("Esta observación no tiene coordenadas GPS.");
+            return;
+        }
+        Navigate(`/?lat=${item.lat}&lng=${item.lng}&zoom=18&id=${item.id}`);
+    };
+
     const handleVerPreview = async (seleccion) => {
          try {
             const url = await obtenerPreviewPDF(seleccion); 
@@ -376,6 +387,13 @@ export const ListaObservaciones = ({ observaciones, loading, error, onEdit, onDa
                         </div>
                         
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <button 
+                                onClick={() => verEnMapa(item)} 
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2em' }}
+                                title="Ver ubicación en mapa"
+                            >
+                                📍
+                            </button>
                             <button onClick={() => handleVerPreview([item])} style={{ background: 'none', border: 'none', cursor: 'pointer' }} title="Descargar PDF Individual">
                                 📄
                             </button>
@@ -416,7 +434,7 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
         tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, imagenes, setImagenes,
-        encurso, errorEnvio, handleSubmit
+        lat, setLat, lng, setLng, obtenerUbicacionGPS, encurso, errorEnvio, handleSubmit
     } = useObservacionForm(onSuccessCallback);
 
     const { tramos, loading: loadingTramos, error: errorTramos} = useFetchTramos();
@@ -518,6 +536,22 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
                 <label style={labelStyle}>Observación Corta:</label>
                 <input type="text" value={observacionCorta} onChange={(e) => setObservacionCorta(e.target.value)} required style={inputstyle} />
             </div>
+            <div style={{ padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+                <h4 style={{ marginTop: 0 }}>Geolocalización <small style={{color: '#9b9b'}}>(opcional)</small></h4>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontSize: '0.8em' }}>Latitud:</label>
+                        <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} style={{ width: '100%', padding: '8px' }} placeholder="0.0000" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', fontSize: '0.8em' }}>Longitud:</label>
+                        <input type="number" step="any" value={lng} onChange={(e) => setLng(e.target.value)} style={{ width: '100%', padding: '8px' }} placeholder="0.0000" />
+                    </div>
+                    <button type="button" onClick={obtenerUbicacionGPS} style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>
+                        📍 Obtener GPS
+                    </button>
+                </div>
+            </div>
             <div style={formGroupStyle}>
                 <button type="submit" disabled={encurso} style={{padding: '8px 12px'}}>
                     {encurso ? 'Enviando...' : 'Agregar Observación'}
@@ -534,7 +568,7 @@ export const EditarObservacion = ({observacionId, onSuccessCallback, onCancel}) 
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, estado, setEstado,
         imagenesNuevas, setImagenesNuevas, imagenesExistentes, handleRemoveExistingImage,
-        encurso, errorEnvio, handleSubmit, loadingData
+        lat, setLat, lng, setLng, obtenerUbicacionGPS, encurso, errorEnvio, handleSubmit, loadingData
     } = useUpdateObservacion(observacionId, onSuccessCallback);
 
     const { tramos, loading: loadingTramos } = useFetchTramos();
@@ -654,6 +688,22 @@ export const EditarObservacion = ({observacionId, onSuccessCallback, onCancel}) 
             <div style={{marginBottom: '15px'}}>
                 <label style={labelStyle}>Agregar o cambiar imagenes (opcional):</label>
                 <input type="file" accept="image/*" multiple onChange={(e) => setImagenesNuevas(e.target.files)} style={inputstyle} />
+            </div>
+            <div style={{ backgroundColor: '#fdfdfd', padding: '15px', borderRadius: '8px', border: '1px solid #eee', marginBottom: '15px' }}>
+                <h4 style={{ marginTop: 0 }}>Corregir Ubicación GPS</h4>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <div style={{ flex: 1 }}>
+                        <label>Latitud:</label>
+                        <input type="number" step="any" value={lat} onChange={(e) => setLat(e.target.value)} style={{ width: '100%', padding: '8px' }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <label>Longitud:</label>
+                        <input type="number" step="any" value={lng} onChange={(e) => setLng(e.target.value)} style={{ width: '100%', padding: '8px' }} />
+                    </div>
+                    <button type="button" onClick={obtenerUbicacionGPS} style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px' }}>
+                        📍 Actualizar a GPS Actual
+                    </button>
+                </div>
             </div>
             <div>
                 <button type="submit" disabled={encurso} style={{padding: '8px 12px', marginRight: '10px'}}>

@@ -35,7 +35,8 @@ model Elemento{
 model Observacion{
   id Int @id @default(autoincrement())
   kilometro String @db.VarChar(50)
-  coordenadas String? @db.VarChar(100)
+  lat Float?
+  lng Float?
   cuerpo String @db.VarChar(20)
   carril String @db.VarChar(20)
   fecha DateTime

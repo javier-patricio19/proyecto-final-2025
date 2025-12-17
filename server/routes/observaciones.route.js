@@ -46,12 +46,27 @@ router.post("/agregarObservacion",upload.array('imagenes', 10), async (req, res)
 
         datosObservacion.tramoId = parseInt(datosObservacion.tramoId);
         datosObservacion.elementoId = parseInt(datosObservacion.elementoId);
+        if (datosObservacion.lat) datosObservacion.lat = parseFloat(datosObservacion.lat);
+        if (datosObservacion.lng) datosObservacion.lng = parseFloat(datosObservacion.lng);
         
         console.log("Datos recibidos para la observación:", datosObservacion);
         console.log("Archivos recibidos:", archivos.length);
 
         const newObservacion = await prisma.observacion.create({
-            data: datosObservacion,
+            data: {
+                tramoId: datosObservacion.tramoId,
+                elementoId: datosObservacion.elementoId,
+                kilometro: datosObservacion.kilometro,
+                cuerpo: datosObservacion.cuerpo,
+                carril: datosObservacion.carril,
+                fecha: new Date(datosObservacion.fecha), 
+                observacion: datosObservacion.observacion,
+                observacion_corta: datosObservacion.observacion_corta,
+                recomendacion: datosObservacion.recomendacion,
+                estado: datosObservacion.estado || 'Reportado',
+                lat: datosObservacion.lat || null,
+                lng: datosObservacion.lng || null
+            },
         });
         console.log("Observación principal creada:", newObservacion.id);
 
@@ -130,6 +145,8 @@ router.put("/editarObservacion/:id", upload.array('imagenes', 10), async (req, r
         if(datosActualizar.elementoId) datosActualizar.elementoId = parseInt(datosActualizar.elementoId);
         if(datosActualizar.estado) datosActualizar.estado = String(datosActualizar.estado);
         if(datosActualizar.fecha) datosActualizar.fecha = new Date(datosActualizar.fecha);
+        if (datosActualizar.lat) datosActualizar.lat = parseFloat(datosActualizar.lat);
+        if (datosActualizar.lng) datosActualizar.lng = parseFloat(datosActualizar.lng);
         
         const observacionUpdated = await prisma.observacion.update({
             where: {id: observacionId},
