@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { EditarObservacion } from "../components/observacionesComponents";
+import { EditarObservacion } from "../components/EditarObservacion";
 import { toast } from 'react-toastify';
 
 function EditarObservaciones(){

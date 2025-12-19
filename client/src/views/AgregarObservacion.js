@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { CrearObservacionForm } from "../components/observacionesComponents";
+import { CrearObservacionForm } from '../components/CrearObservacionForm';
 import { toast } from 'react-toastify';
 
 function AgregarObservacion() {

@@ -1,9 +1,9 @@
 export const fetchElementos = async () => {
     try {
-        const response = await fetch("/api/verElementos");
+        const response = await fetch("/api/elementos");
 
         if (!response.ok) {
-            throw new Error('Error, estado: ${response.status}');
+            throw new Error(`Error, estado: ${response.status}`);
         }
         const data = await response.json();
         return data;
@@ -18,7 +18,7 @@ export const crearElemento = async (data) => {
     const dataToSend = {...data, updated_at: update};
 
     try {
-        const response = await fetch("/api/agregarElemento", {
+        const response = await fetch("/api/elementos", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const updateElemento = async (id, data) => {
     const dataToSend = {...data, updated_at: update};
 
     try {
-        const response = await fetch(`/api/editarElemento/${id}`, {
+        const response = await fetch(`/api/elementos/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -66,7 +66,7 @@ export const updateElemento = async (id, data) => {
 
 export const deleteElemento = async (id) => {
     try {
-        const response = await fetch(`/api/borrarElemento/${id}`, {
+        const response = await fetch(`/api/elementos/${id}`, {
             method: 'DELETE',
         });
 

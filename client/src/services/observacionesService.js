@@ -1,6 +1,6 @@
 export const crearObservacion = async (data) => {
     try {
-        const response = await fetch('/api/agregarObservacion', {
+        const response = await fetch('/api/observaciones', {
             method: 'POST',
             body: data,
         });
@@ -17,7 +17,7 @@ export const crearObservacion = async (data) => {
 
 export const fetchObservaciones = async () => {
     try {
-        const response = await fetch("/api/verObservaciones");
+        const response = await fetch("/api/observaciones");
         if (!response.ok) throw new Error(`Error, Estado: ${response.status}`);
         return response.json();
     } catch (error) {
@@ -28,7 +28,7 @@ export const fetchObservaciones = async () => {
 
 export const updateObservacion = async (id, data) => {
     try {
-        const response = await fetch(`/api/editarObservacion/${id}`, {
+        const response = await fetch(`/api/observaciones/${id}`, {
             method: 'PUT',
             body: data,
         });
@@ -42,7 +42,7 @@ export const updateObservacion = async (id, data) => {
 
 export const deleteObservacion = async (id) => {
     try {
-        const response = await fetch(`/api/borrarObservacion/${id}`, {
+        const response = await fetch(`/api/observaciones/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Error al eliminar la observación');
@@ -55,7 +55,7 @@ export const deleteObservacion = async (id) => {
 
 export const fetchObservacionById =async (id) => {
     try {
-        const response = await fetch(`/api/verObservacion/${id}`);
+        const response = await fetch(`/api/observaciones/${id}`);
         if (!response.ok) throw new Error(`Error, Estado: ${response.status}`);
         return response.json();
     } catch (error) {
@@ -66,7 +66,7 @@ export const fetchObservacionById =async (id) => {
 
 export const deleteImagen = async (id) => {
     try {
-        const response = await fetch(`/api/borrarImagen/${id}`,{
+        const response = await fetch(`/api/imagenes/${id}`,{
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Error al eliminar la imagen');
@@ -79,7 +79,7 @@ export const deleteImagen = async (id) => {
 
 export const deleteMultipleObservaciones = async (ids) => {
     try {
-        const response = await fetch("/api/borrarMultiple", {
+        const response = await fetch("/api/observaciones/multiple", {
             method:'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ids }),
@@ -95,10 +95,12 @@ export const deleteMultipleObservaciones = async (ids) => {
 
 export const actualizarEstadoObservacion = async (id, nuevoEstado) => {
     try {
-        const response = await fetch(`/api/editarObservacion/${id}`, {
+        const formData = new FormData();
+        formData.append('estado', nuevoEstado);
+
+        const response = await fetch(`/api/observaciones/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ estado: nuevoEstado }),
+            body: formData,
         });
         if (!response.ok) throw new Error('Error al actualizar el estado');
         return await response.json();
@@ -107,4 +109,3 @@ export const actualizarEstadoObservacion = async (id, nuevoEstado) => {
         throw error;
     }
 };
-

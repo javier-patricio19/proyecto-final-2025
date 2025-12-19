@@ -1,9 +1,9 @@
 export const fetchTramos = async () => {
     try {
-        const response = await fetch("/api/verTramos");
+        const response = await fetch(`/api/tramos`);
 
         if (!response.ok) {
-            throw new Error('Error, Estado: ${response.status}');
+            throw new Error(`Error, Estado: ${response.status}`);
         }
 
         const data = await response.json();
@@ -20,7 +20,7 @@ export const crearTramos = async (data) => {
     const dataToSend = {...data, updated_at: update};
 
     try {
-        const response = await fetch("/api/agregarTramos", {
+        const response = await fetch("/api/tramos", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const updateTramo = async (id, data) => {
     const dataToSend = {...data, updated_at: update};
 
     try {
-        const response = await fetch(`/api/editarTramo/${id}`, {
+        const response = await fetch(`/api/tramos/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -71,7 +71,7 @@ export const updateTramo = async (id, data) => {
 
 export const deleteTramo = async (id) => {
     try {
-        const response = await fetch(`/api/borrartramo/${id}`, {
+        const response = await fetch(`/api/tramos/${id}`, {
             method: 'DELETE',
         });
 
