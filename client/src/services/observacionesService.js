@@ -1,111 +1,36 @@
-export const crearObservacion = async (data) => {
-    try {
-        const response = await fetch('/api/observaciones', {
-            method: 'POST',
-            body: data,
-        });
-        if (!response.ok) {
-            const errorDatos = await response.json();
-            throw new Error(errorDatos.error || 'Error al crear la observación');
-        }
-        return response.json();
-    } catch (error) {
-        console.error('Error en crearObservacion:', error);
-        throw error;
-    }
-};
+import { api } from "../utils/api";
 
 export const fetchObservaciones = async () => {
-    try {
-        const response = await fetch("/api/observaciones");
-        if (!response.ok) throw new Error(`Error, Estado: ${response.status}`);
-        return response.json();
-    } catch (error) {
-        console.error('Error en fetchObservaciones:', error);
-        throw error;
-    }
-};
-
-export const updateObservacion = async (id, data) => {
-    try {
-        const response = await fetch(`/api/observaciones/${id}`, {
-            method: 'PUT',
-            body: data,
-        });
-        if (!response.ok) { throw new Error('Error al actualizar la observación'); }
-        return response.json();
-    } catch (error) {
-        console.error('Error en updateObservacion:', error);
-        throw error;
-    }
-};
-
-export const deleteObservacion = async (id) => {
-    try {
-        const response = await fetch(`/api/observaciones/${id}`, {
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Error al eliminar la observación');
-        return {id, message: 'Observación eliminada correctamente'};
-    } catch (error) {
-        console.error('Error en deleteObservacion:', error);
-        throw error;
-    }
+    return await api.get('/observaciones');
 };
 
 export const fetchObservacionById =async (id) => {
-    try {
-        const response = await fetch(`/api/observaciones/${id}`);
-        if (!response.ok) throw new Error(`Error, Estado: ${response.status}`);
-        return response.json();
-    } catch (error) {
-        console.error("Error en fetchObservacionById: ", error);
-        throw error;
-    }
+    return await api.get(`/observaciones/${id}`);
+};
+
+export const crearObservacion = async (data) => {
+    return await api.post('/observaciones', data);
+};
+
+export const updateObservacion = async (id, data) => {
+    return await api.put(`/observaciones/${id}`, data);
+};
+
+export const updateEstadoObservacion = async (id, nuevoEstado) => {
+    const formData = new FormData();
+    formData.append('estado', nuevoEstado);
+    return await api.put(`/observaciones/${id}`, formData);
+};
+
+export const deleteObservacion = async (id) => {
+    return await api.delete(`/observaciones/${id}`);
 };
 
 export const deleteImagen = async (id) => {
-    try {
-        const response = await fetch(`/api/imagenes/${id}`,{
-            method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Error al eliminar la imagen');
-        return {id, message: 'Imagen eliminada correctamente'};
-    } catch (error) {
-        console.error('Imagen eliminada correctamente');
-        throw error;
-    }
+    return await api.delete(`/imagenes/${id}`);
 };
 
 export const deleteMultipleObservaciones = async (ids) => {
-    try {
-        const response = await fetch("/api/observaciones/multiple", {
-            method:'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids }),
-        });
-        if (!response.ok) throw new Error('Error al eliminar múltiples observaciones');
-        return await response.json();
-
-    } catch (error) {
-        console.error('Error en deleteMultipleObservaciones:', error);
-        throw error;
-    }
+    return await api.delete('/observaciones/multiple', {ids});
 }
 
-export const actualizarEstadoObservacion = async (id, nuevoEstado) => {
-    try {
-        const formData = new FormData();
-        formData.append('estado', nuevoEstado);
-
-        const response = await fetch(`/api/observaciones/${id}`, {
-            method: 'PUT',
-            body: formData,
-        });
-        if (!response.ok) throw new Error('Error al actualizar el estado');
-        return await response.json();
-    } catch (error) {
-        console.error('Error en actualizarEstadoObservacion:', error);
-        throw error;
-    }
-};

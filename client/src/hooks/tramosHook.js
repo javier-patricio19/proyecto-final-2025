@@ -1,29 +1,27 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import Swal from "sweetalert2";
-import {fetchTramos, crearTramos, updateTramo, deleteTramo} from '../services/tramosService';
+import { fetchTramos, crearTramos, updateTramo, deleteTramo } from '../services/tramosService';
 import { toast } from 'react-toastify';
 
 export const useFetchTramos = () => {
-    const [tramos, setTramos] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [tramos, setTramos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadData = async () => {
+        let mounted = true;
+        const load = async () => {
             try {
                 const data = await fetchTramos();
-                setTramos(data);
-                setLoading(false);
+                if(mounted) { setTramos(data); setLoading(false); }
             } catch (err) {
-                setError(err);
-                setLoading(false);
+                if(mounted) { setError(err); setLoading(false); }
             }
         };
-    
-        loadData();
+        load();
+        return () => { mounted = false; };
     }, []);
-
-    return {tramos, loading, error };
+    return { tramos, loading, error };
 };
 
 export const useFormTramos = (onSuccessCallback) => {
@@ -36,32 +34,14 @@ export const useFormTramos = (onSuccessCallback) => {
         event.preventDefault();
         setEncurso(true);
         setError(null);
-
-        const dataToSend = {inicio, destino};
-
         try {
-            const nuevoRegitro = await crearTramos(dataToSend);
-
-            setInicio('');
-            setDestino('');
-            setEncurso(false);
-
-            if (onSuccessCallback) {
-                onSuccessCallback(nuevoRegitro);
-            }
-        } catch (err) {
-            setError(err.message);
-            setEncurso(false);
-        }
+            const nuevo = await crearTramos({inicio, destino});
+            setInicio(''); setDestino('');
+            if (onSuccessCallback) onSuccessCallback(nuevo);
+        } catch (err) { setError(err.message); }
+        finally { setEncurso(false); }
     };
-
-    return {
-        inicio, setInicio,
-        destino, setDestino,
-        encurso,
-        error,
-        handleSubmit,
-    };
+    return { inicio, setInicio, destino, setDestino, encurso, error, handleSubmit };
 };
 
 export const useUpdateTramo = (onSuccessCallback) => {
@@ -72,49 +52,33 @@ export const useUpdateTramo = (onSuccessCallback) => {
         event.preventDefault();
         setEncursoUpdate(true);
         setErrorUpdate(null);
-
         try {
-            const registroActualizado = await updateTramo(id, data);
-            
-            setEncursoUpdate(false);
-            if (onSuccessCallback) {
-                onSuccessCallback(registroActualizado);
-            }
-
-        } catch (err) {
-            setErrorUpdate(err.message);
-            setEncursoUpdate(false);
-        }
+            const actualizado = await updateTramo(id, data);
+            if (onSuccessCallback) onSuccessCallback(actualizado);
+        } catch (err) { setErrorUpdate(err.message); }
+        finally { setEncursoUpdate(false); }
     };
-
-    return {
-        encursoUpdate,
-        errorUpdate,
-        handleUpdateSubmit,
-    };
+    return { encursoUpdate, errorUpdate, handleUpdateSubmit };
 };
 
 export const useDeleteTramo = (onSuccessCallback) => {
+    const [deleting, setDeleting] = useState(false);
+
     const handleDelete = async (id) => {
         const result = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: `Se eliminará el tramo ID: ${id}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminar'
+            title: '¿Estás seguro?', text: `Se eliminará ID: ${id}`,
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#d33', confirmButtonText: 'Eliminar'
         });
+
         if (result.isConfirmed) {
+            setDeleting(true);
             try {
                 await deleteTramo(id);
-                toast.info("Tramo eliminado con éxito."); 
-                if (onSuccessCallback) {
-                    onSuccessCallback(id);
-                }
-            } catch (err) {
-                toast.error(`Error al eliminar: ${err.message}`);
-            }   
+                if (onSuccessCallback) onSuccessCallback(id);
+            } catch (err) { toast.error(err.message); }
+            finally { setDeleting(false); }
         }
     };
-    return { handleDelete };
+    return { deleting, handleDelete };
 };

@@ -1,83 +1,21 @@
-export const fetchElementos = async () => {
-    try {
-        const response = await fetch("/api/elementos");
+import { api } from "../utils/api";
 
-        if (!response.ok) {
-            throw new Error(`Error, estado: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("hubo un problema con la operación fetch:", error);
-        throw error;
-    }
+export const fetchElementos = async () => {
+    return await api.get('/elementos');
 };
 
 export const crearElemento = async (data) => {
     const update = new Date().toISOString();
     const dataToSend = {...data, updated_at: update};
-
-    try {
-        const response = await fetch("/api/elementos", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(dataToSend),
-        });
-        if (!response.ok) {
-            const errorDatos = await response.json();
-            throw new Error(errorDatos.error || 'fallo al agregar el dato');
-        }
-
-        const registroNuevo = await response.json();
-        return registroNuevo;
-
-    } catch (error) {
-        console.error("error en fetch POST", error);
-        throw error;
-    }
+    return await api.post('/elementos', dataToSend);
 };
 
 export const updateElemento = async (id, data) => {
     const update = new Date().toISOString();
     const dataToSend = {...data, updated_at: update};
-
-    try {
-        const response = await fetch(`/api/elementos/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dataToSend),
-        });
-        if (!response.ok) {
-            const errorDatos = await response.json();
-            throw new Error(errorDatos.error || 'fallo al actualizar el dato');
-        }
-
-        const datoActualizado = await response.json();
-        return datoActualizado;
-    } catch (error) {
-        console.error("error en fetch PUT", error);
-        throw error;
-    }
+    return await api.put(`/elementos/${id}`, dataToSend);
 };
 
 export const deleteElemento = async (id) => {
-    try {
-        const response = await fetch(`/api/elementos/${id}`, {
-            method: 'DELETE',
-        });
-
-        if (!response.ok) {
-            const errorDatos = await response.json();
-            throw new Error(errorDatos.error || 'fallo al eliminar el dato');
-        }
-        return {id, message: "eliminado con éxito"};
-
-    } catch (error) {
-        console.error("error en fetch DELETE", error);
-        throw error;
-    }
+    return await api.delete(`/elementos/${id}`);
 };

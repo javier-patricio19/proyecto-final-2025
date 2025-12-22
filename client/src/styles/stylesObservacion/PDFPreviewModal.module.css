@@ -1,0 +1,67 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.toolbar {
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.content {
+  width: 90%;
+  height: 85%;
+  background-color: #525659;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: white;
+  transition: filter 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btnClose {
+  background-color: var(--danger);
+}
+
+.btnClose:hover {
+  background-color: #c0392b;
+}
+
+.btnDownload {
+  background-color: var(--success);
+}
+
+.btnDownload:hover {
+  background-color: #27ae60;
+}

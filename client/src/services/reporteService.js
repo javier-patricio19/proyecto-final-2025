@@ -1,5 +1,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { API_BASE_URL } from "../utils/config";
+
+const SERVER_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const getImageFromURL = async (url) => {
     const cleanUrl = `${url}?nocache=${Date.now()}`;
@@ -24,7 +27,7 @@ const getImageFromURL = async (url) => {
             reader.readAsDataURL(blob);
         });
     } catch (error) {
-        console.error("Fallo crítico obteniendo imagen:", url, error);
+        console.warn("Fallo crítico obteniendo imagen:", url, error);
         return null; 
     }
 
@@ -32,7 +35,6 @@ const getImageFromURL = async (url) => {
 
 export const generarReportePDF = async (observaciones) => {
     const doc = new jsPDF();
-    const servidor = "http://localhost:5000";
 
     for (let i = 0; i < observaciones.length; i++) {
         const obs = observaciones[i];
@@ -75,7 +77,8 @@ export const generarReportePDF = async (observaciones) => {
         if (obs.imagenes && obs.imagenes.length > 0) {
 
             for (const imgData of obs.imagenes) {
-                const fullUrl = `${servidor}${imgData.ruta}`;
+                const ruta = imgData.ruta.startsWith('/') ? imgData.ruta : `/${imgData.ruta}`;
+                const fullUrl = `${SERVER_URL}${ruta}`;
                 console.log("Procesando imagen:", fullUrl);
                 const base64Img = await getImageFromURL(fullUrl);
                 

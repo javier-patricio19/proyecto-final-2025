@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { fetchObservaciones, updateObservacion, deleteObservacion, crearObservacion, fetchObservacionById, deleteImagen } from "../services/observacionesService";
+import { 
+    fetchObservaciones, updateObservacion, deleteObservacion, 
+    crearObservacion, fetchObservacionById, deleteImagen 
+} from "../services/observacionesService";
 import { toast } from 'react-toastify';
 
 export const useFetchObservaciones = () => {
@@ -9,17 +12,17 @@ export const useFetchObservaciones = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadData = async () => {
+        let mounted = true;
+        const load = async () => {
             try {
                 const data = await fetchObservaciones();
-                setObservaciones(data);
-                setLoading(false);
+                if(mounted) { setObservaciones(data); setLoading(false); }
             } catch (err) {
-                setError(err);
-                setLoading(false);
+                if(mounted) { setError(err); setLoading(false); }
             }
         };
-        loadData();
+        load();
+        return () => { mounted = false; };
     }, []);
     return { observaciones, loading, error };
 };
@@ -34,39 +37,24 @@ export const useObservacionForm = (onSuccessCallback) => {
     const [observacion, setObservacion] = useState('');
     const [observacionCorta, setObservacionCorta] = useState('');
     const [recomendacion, setRecomendacion] = useState('');
-    const [encurso, setEncurso] = useState(false);
-    const [errorEnvio, setErrorEnvio] = useState(null);
-    const [imagenes, setImagenes] = useState(null);
     const [lat, setLat] = useState('');
     const [lng, setLng] = useState('');
+    const [imagenes, setImagenes] = useState(null);
+    const [encurso, setEncurso] = useState(false);
+    const [errorEnvio, setErrorEnvio] = useState(null);
 
     const obtenerUbicacionGPS = () => {
-        if (!navigator.geolocation) {
-            toast.error("Tu navegador no soporta geolocalización");
-            return;
-        }
-
+        if (!navigator.geolocation) return toast.error("Sin soporte GPS");
         navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                setLat(pos.coords.latitude);
-                setLng(pos.coords.longitude);
-                toast.success("Ubicación capturada con éxito");
-            },
-            (error) => {
-                toast.error("Error al obtener ubicación: " + error.message);
-            }
+            (pos) => { setLat(pos.coords.latitude); setLng(pos.coords.longitude); toast.success("Ubicación OK"); },
+            (err) => toast.error("Error GPS: " + err.message)
         );
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!imagenes || imagenes.length === 0) {
-            setErrorEnvio('Por favor, seleccione al menos una imagen.');
-            setEncurso(false);
-            return;
-        }
-        setEncurso(true);
-        setErrorEnvio(null);
+        if (!imagenes || imagenes.length === 0) return setErrorEnvio('Falta imagen');
+        setEncurso(true); setErrorEnvio(null);
 
         const formData = new FormData();
         formData.append('tramoId', tramoId);
@@ -81,25 +69,19 @@ export const useObservacionForm = (onSuccessCallback) => {
         formData.append('estado', 'Reportado');
         formData.append('lat', lat);
         formData.append('lng', lng);
-
-        for (let i = 0; i < imagenes.length; i++) {
-            formData.append('imagenes', imagenes[i]);
-        }
+        for (let i = 0; i < imagenes.length; i++) formData.append('imagenes', imagenes[i]);
 
         try {
-            const nuevaObservacion = await crearObservacion(formData);
-            if (onSuccessCallback) onSuccessCallback(nuevaObservacion);
-
+            const res = await crearObservacion(formData);
+            if (onSuccessCallback) onSuccessCallback(res);
+            // Reset
             setTramoId(''); setElementoId(''); setKilometro(''); setCuerpo('');
             setCarril(''); setFecha(new Date().toISOString().slice(0, 10));
             setObservacion(''); setObservacionCorta(''); setRecomendacion('');
-            setImagenes(null); setEncurso(false);
-        } catch (err) {
-            setErrorEnvio(err.message);
-            setEncurso(false);
-        }
+            setImagenes(null);
+        } catch (err) { setErrorEnvio(err.message); }
+        finally { setEncurso(false); }
     };
-
     return {
         tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
@@ -119,128 +101,88 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
     const [observacionCorta, setObservacionCorta] = useState('');
     const [recomendacion, setRecomendacion] = useState('');
     const [estado, setEstado] = useState(''); 
+    const [lat, setLat] = useState('');
+    const [lng, setLng] = useState('');
     const [imagenesNuevas, setImagenesNuevas] = useState(null); 
     const [imagenesExistentes, setImagenesExistentes] = useState([]);
     const [imagenesEliminarIds, setImagenesEliminarIds] = useState([]);
-    const [lat, setLat] = useState('');
-    const [lng, setLng] = useState('');
-
     const [encurso, setEncurso] = useState(false);
     const [errorEnvio, setErrorEnvio] = useState(null);
     const [loadingData, setLoadingData] = useState(true);
 
-    const handleRemoveExistingImage = (imageId) => {
-        setImagenesEliminarIds(prevIds => [...prevIds, imageId]);
-        setImagenesExistentes(prevImages => prevImages.filter(img => img.id !== imageId));
+    const handleRemoveExistingImage = (id) => {
+        setImagenesEliminarIds(prev => [...prev, id]);
+        setImagenesExistentes(prev => prev.filter(img => img.id !== id));
     };
 
     useEffect(() => {
-        const loadObservacionData = async () => {
+        let mounted = true;
+        const load = async () => {
             try {
                 const data = await fetchObservacionById(observacionId);
-                setTramoId(data.tramoId.toString());
-                setElementoId(data.elementoId.toString());
-                setKilometro(data.kilometro);
-                setCuerpo(data.cuerpo);
-                setCarril(data.carril);
-                setFecha(new Date(data.fecha).toISOString().slice(0, 10)); 
-                setObservacion(data.observacion);
-                setObservacionCorta(data.observacion_corta);
-                setRecomendacion(data.recomendacion);
-                setEstado(data.estado);
-                setImagenesExistentes(data.imagenes || []);
-                setLat(data.lat || '');
-                setLng(data.lng || '');
-                setLoadingData(false);
-            } catch (err) {
-                setErrorEnvio("No se pudieron cargar los datos de la observación para editar.");
-                setLoadingData(false);
-            }
+                if (mounted) {
+                    setTramoId(data.tramoId); setElementoId(data.elementoId);
+                    setKilometro(data.kilometro); setCuerpo(data.cuerpo); setCarril(data.carril);
+                    setFecha(new Date(data.fecha).toISOString().slice(0, 10));
+                    setObservacion(data.observacion); setObservacionCorta(data.observacion_corta);
+                    setRecomendacion(data.recomendacion); setEstado(data.estado);
+                    setImagenesExistentes(data.imagenes || []);
+                    setLat(data.lat || ''); setLng(data.lng || '');
+                    setLoadingData(false);
+                }
+            } catch (err) { if(mounted) { setErrorEnvio("Error carga"); setLoadingData(false); } }
         };
-        loadObservacionData();
+        load();
+        return () => { mounted = false; };
     }, [observacionId]);
-
-    const obtenerUbicacionGPS = () => {
-        if (!navigator.geolocation) return;
-        navigator.geolocation.getCurrentPosition((pos) => {
-            setLat(pos.coords.latitude);
-            setLng(pos.coords.longitude);
-        });
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setEncurso(true);
-        setErrorEnvio(null);
-
+        setEncurso(true); setErrorEnvio(null);
         try {
-            for(const imgId of imagenesEliminarIds){
-                await deleteImagen(imgId)
-                console.log(`Imagen ID ${imgId} eleminada del servidor.`);
-            }
-        } catch (error) {
-            console.error("Error durante la eliminación previa de imágenes:", error);
-        }
+            if (imagenesEliminarIds.length > 0) await Promise.all(imagenesEliminarIds.map(id => deleteImagen(id)));
+            
+            const formData = new FormData();
+            formData.append('tramoId', tramoId); formData.append('elementoId', elementoId);
+            formData.append('kilometro', kilometro); formData.append('cuerpo', cuerpo);
+            formData.append('carril', carril); formData.append('fecha', new Date(fecha).toISOString());
+            formData.append('observacion', observacion); formData.append('observacion_corta', observacionCorta);
+            formData.append('recomendacion', recomendacion); formData.append('estado', estado);
+            formData.append('lat', lat); formData.append('lng', lng);
+            if(imagenesNuevas) for (let i = 0; i < imagenesNuevas.length; i++) formData.append('imagenes', imagenesNuevas[i]);
 
-        const formData = new FormData();
-        formData.append('tramoId', tramoId);
-        formData.append('elementoId', elementoId);
-        formData.append('kilometro', kilometro);
-        formData.append('cuerpo', cuerpo);
-        formData.append('carril', carril);
-        formData.append('fecha', new Date(fecha).toISOString());
-        formData.append('observacion', observacion);
-        formData.append('observacion_corta', observacionCorta);
-        formData.append('recomendacion', recomendacion);
-        formData.append('lat', lat);
-        formData.append('lng', lng);
-        formData.append('estado', estado);
-
-        if(imagenesNuevas && imagenesNuevas.length > 0) {
-            for (let i = 0; i < imagenesNuevas.length; i++) {
-                formData.append('imagenes', imagenesNuevas[i]);
-            }
-        }
-
-        try {
-            const observacionActualizada = await updateObservacion(observacionId, formData);
-            if (onSuccessCallback) onSuccessCallback(observacionActualizada);
-            setEncurso(false);
-        } catch (err) {
-            setErrorEnvio(err.message);
-            setEncurso(false);
-        }
+            const res = await updateObservacion(observacionId, formData);
+            if (onSuccessCallback) onSuccessCallback(res);
+        } catch (err) { setErrorEnvio(err.message); }
+        finally { setEncurso(false); }
     };
-
     return {
          tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, 
         estado, setEstado, imagenesNuevas, setImagenesNuevas, imagenesExistentes, handleRemoveExistingImage,
-        encurso, errorEnvio, lat, setLat, lng, setLng, obtenerUbicacionGPS, handleSubmit, loadingData
+        encurso, errorEnvio, lat, setLat, lng, setLng, handleSubmit, loadingData
     };
 };
 
 export const useDeleteObservacion = (onSuccessCallback) => {
+    const [deleting, setDeleting] = useState(false);
+
     const handleDelete = async (id) => {
         const result = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: `Se eliminará la observación ID: ${id}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminar'
+            title: '¿Eliminar?', text: `ID: ${id}`,
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#d33', confirmButtonText: 'Sí'
         });
-
         if (result.isConfirmed) {
+            setDeleting(true);
             try {
                 await deleteObservacion(id);
-                toast.info("Observación eliminado correctamente.");
+                toast.info("Eliminado.");
                 if (onSuccessCallback) onSuccessCallback(id);
-            } catch (err) {
-                toast.error(`Error al eliminar la observación: ${err.message}`);
-            }
+            } catch (err) { toast.error(err.message); }
+            finally { setDeleting(false); }
         }
     };
-    return { handleDelete };
+    return { deleting, handleDelete };
 };

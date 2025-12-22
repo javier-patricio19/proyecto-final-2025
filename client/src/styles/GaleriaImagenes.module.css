@@ -1,0 +1,121 @@
+.container {
+  padding: 20px;
+}
+
+.title {
+  color: var(--text-main);
+  margin-bottom: 20px;
+}
+
+.filterBar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  align-items: center;
+}
+
+.searchInput {
+  flex: 2;
+  min-width: 200px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+}
+
+.filterSelect {
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-width: 150px;
+}
+
+.btnClear {
+  padding: 10px 20px;
+  background-color: var(--text-muted);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnClear:hover {
+  background-color: var(--text-main);
+}
+
+.groupContainer {
+  margin-bottom: 40px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.groupHeader {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: var(--primary);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.groupHeader small {
+  color: var(--text-muted);
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.imageGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.imageWrapper {
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
+}
+
+.thumbnail {
+  width: 180px;
+  height: 130px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  display: block;
+}
+
+.thumbnail:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1);
+}
+
+.noResults {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 50px;
+  font-size: 1.2rem;
+}
+
+.loading, .error {
+  padding: 20px;
+  text-align: center;
+  color: var(--text-main);
+}
+.error { color: var(--danger); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

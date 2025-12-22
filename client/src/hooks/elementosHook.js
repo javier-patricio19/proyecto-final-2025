@@ -4,22 +4,22 @@ import { fetchElementos, crearElemento, updateElemento, deleteElemento } from ".
 import { toast } from 'react-toastify';
 
 export const useFetchElementos = () => {
-  const [elementos, setElementos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+    const [elementos, setElementos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadData = async () => {
+        let mounted = true;
+        const load = async () => {
             try {
                 const data = await fetchElementos();
-                setElementos(data);
-                setLoading(false);
+                if(mounted) { setElementos(data); setLoading(false); }
             } catch (err) {
-                setError(err);
-                setLoading(false);
+                if(mounted) { setError(err); setLoading(false); }
             }
         };
-        loadData();
+        load();
+        return () => { mounted = false; };
     }, []);
     return { elementos, loading, error };
 };
@@ -35,19 +35,14 @@ export const useCrearElemento = (onSuccessCallback) => {
         event.preventDefault();
         setEncurso(true);
         setError(null);
-        const dataToSend = { tipo, nombre, descripcion };
-
         try {
-            const resultado = await crearElemento(dataToSend);
-            setEncurso(false);
-            if (onSuccessCallback) onSuccessCallback(resultado);
+            const res = await crearElemento({ tipo, nombre, descripcion });
             setTipo(''); setNombre(''); setDescripcion('');
-        } catch (err) {
-            setError(err.message);
-            setEncurso(false);
-        }
+            if (onSuccessCallback) onSuccessCallback(res);
+        } catch (err) { setError(err.message); }
+        finally { setEncurso(false); }
     };
-    return {tipo, setTipo, nombre, setNombre, descripcion, setDescripcion, encurso, error, handleSubmit };
+    return { tipo, setTipo, nombre, setNombre, descripcion, setDescripcion, encurso, error, handleSubmit };
 };
 
 export const useUpdateElemento = (onSuccessCallback) => {
@@ -58,38 +53,32 @@ export const useUpdateElemento = (onSuccessCallback) => {
         event.preventDefault();
         setEncursoUpdate(true);
         setErrorUpdate(null);
-
         try {
-            const registroActualizado = await updateElemento(id, data);
-            setEncursoUpdate(false);
-            if (onSuccessCallback) onSuccessCallback(registroActualizado);
-        } catch (err) {
-            setErrorUpdate(err.message);
-            setEncursoUpdate(false);
-        }
+            const res = await updateElemento(id, data);
+            if (onSuccessCallback) onSuccessCallback(res);
+        } catch (err) { setErrorUpdate(err.message); }
+        finally { setEncursoUpdate(false); }
     };
     return { encursoUpdate, errorUpdate, handleUpdateSubmit };
 };
 
 export const useDeleteElemento = (onSuccessCallback) => {
+    const [deleting, setDeleting] = useState(false);
+
     const handleDelete = async (id) => {
         const result = await Swal.fire({
-            title: '¿Estás seguro?',
-            text: `Se eliminará el elemento ID: ${id}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminar'
+            title: '¿Estás seguro?', text: `Se eliminará ID: ${id}`,
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#d33', confirmButtonText: 'Eliminar'
         });
         if (result.isConfirmed) {
+            setDeleting(true);
             try {
                 await deleteElemento(id);
-                toast.info("Elemento eliminado correctamente.");
                 if (onSuccessCallback) onSuccessCallback(id);
-            } catch (err) {
-                toast.error(`Error al eliminar el elemento: ${err.message}`);
-            }
+            } catch (err) { toast.error(err.message); }
+            finally { setDeleting(false); }
         }
     };
-    return { handleDelete };
+    return { deleting, handleDelete };
 };
