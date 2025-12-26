@@ -1,8 +1,10 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { EditarObservacion } from "../components/observaciones/EditarObservacion";
 import { toast } from 'react-toastify';
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function EditarObservaciones(){
+    usePageTitle("Editar Observación")
     const navigate = useNavigate();
     const {id} = useParams();
 

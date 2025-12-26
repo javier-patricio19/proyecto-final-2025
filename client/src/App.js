@@ -28,7 +28,7 @@ function App() {
           <Route path="/imagenes" element={<GaleriaImagenes />} />
 
           {/* Rutas de Gestión (Con Sidebar) */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="/gestion" element={<DashboardLayout />}>
             <Route index element={<Tramos />} />
             <Route path="Tramos" element={<Tramos />} />
             <Route path="Elementos" element={<Elementos />} />

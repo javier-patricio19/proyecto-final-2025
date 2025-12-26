@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { CrearObservacionForm } from '../components/observaciones/CrearObservacionForm';
 import { toast } from 'react-toastify';
-
+import { usePageTitle } from "../hooks/usePageTitle";
 function AgregarObservacion() {
     const navigate = useNavigate();
+    usePageTitle("Agregar Observación");
 
     const handleSuccess = (nuevaObservacion) => {
         console.log("handleSuccess ejecutado. Navegando a ver-observaciones.");

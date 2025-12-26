@@ -4,8 +4,10 @@ import { toast } from 'react-toastify';
 import { ListaElementos } from "../components/elementos/ListaElementos";
 import { AgregarElemento } from "../components/elementos/AgregarElemento";
 import { EditarElemento } from "../components/elementos/EditarElemento";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function Elementos() {
+    usePageTitle("Elementos");
     const { elementos: fetchedElementos, loading, error } = useFetchElementos();
     const [listaElementos, setListaElementos] = useState([]);
     const [editingElemento, setEditingElemento] = useState(null);

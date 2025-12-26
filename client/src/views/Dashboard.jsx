@@ -13,6 +13,7 @@ import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import styles from "../styles/Dashboard.module.css";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PointElement, LineElement, Filler);
 
@@ -38,6 +39,7 @@ function RecenterMap({ coords, zoom }) {
 }
 
 function Dashboard() {
+    usePageTitle("Dashboard");
     const { 
         loading, error, 
         stats, elementosStats, 

@@ -88,3 +88,15 @@
   overflow-y: auto;
   transition: background-color 0.3s;
 }
+
+.navLogo {
+    height: 40px; 
+    width: auto;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.brandContainer {
+    display: flex;
+    align-items: center;
+}

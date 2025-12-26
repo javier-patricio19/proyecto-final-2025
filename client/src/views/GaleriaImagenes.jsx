@@ -11,8 +11,10 @@ import { useFiltros } from "../hooks/FiltrosSeccion";
 import FiltrosSeccion from '../components/observaciones/FiltrosSeccion';
 import ObservacionModal from "../components/observaciones/ObservacionModal";
 import styles from '../styles/GaleriaImagenes.module.css';
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function GaleriaImagenes() {
+    usePageTitle("Galería");
     const { observaciones, loading, error } = useFetchObservaciones();
     const { tramos } = useFetchTramos();
     const { elementos } = useFetchElementos();

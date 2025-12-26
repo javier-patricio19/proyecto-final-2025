@@ -4,8 +4,10 @@ import { toast } from 'react-toastify';
 import { ListaTramos } from '../components/tramos/ListaTramos';
 import { AgregarTramo } from '../components/tramos/AgregarTramo';
 import { EditarTramo } from '../components/tramos/EditarTramo';
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function Tramos() {
+  usePageTitle("Tramos");
   useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);

@@ -2,8 +2,10 @@ import React,{ useState, useEffect } from "react";
 import { useFetchObservaciones } from "../hooks/observacionesHooks";
 import { ListaObservaciones } from "../components/observaciones/ListaObservaciones";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "../hooks/usePageTitle";
 
 function VerObservaciones() {
+    usePageTitle("Lista de Observaciones")
     const { observaciones: fetchedObservaciones, loading, error } = useFetchObservaciones();
     const [listaObservaciones, setListaObservaciones] = useState([]);
     const navigate = useNavigate();
