@@ -1,22 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import "yet-another-react-lightbox/plugins/counter.css";
-import { useGaleria } from '../hooks/useGaleria';
+import { useFetchObservaciones } from '../hooks/observacionesHooks';
+import { useFetchTramos } from '../hooks/tramosHook';
+import { useFetchElementos } from '../hooks/elementosHook'
+import { useFiltros } from "../hooks/FiltrosSeccion";
+import FiltrosSeccion from '../components/observaciones/FiltrosSeccion';
+import ObservacionModal from "../components/observaciones/ObservacionModal";
 import styles from '../styles/GaleriaImagenes.module.css';
 
 function GaleriaImagenes() {
-    const {
-        loading, error, tramos, galeriaFiltrada, slides,
-        searchTerm, setSearchTerm,
-        filterTramo, setFilterTramo,
-        sortBy, setSortBy,
-        resetFilters
-    } = useGaleria();
+    const { observaciones, loading, error } = useFetchObservaciones();
+    const { tramos } = useFetchTramos();
+    const { elementos } = useFetchElementos();
+
+    const safeObservaciones = observaciones || [];
+    const safeTramos = tramos || [];
+    const safeElementos = elementos || [];
+
+    const { 
+        filtros, 
+        datosFiltrados, 
+        handleChange, 
+        limpiarFiltros 
+    } = useFiltros(safeObservaciones, safeTramos, safeElementos);
 
     const [index, setIndex] = useState(-1);
+    const[modalId, setModalId] = useState(null);
+
+    const slides = useMemo(() => {
+        return datosFiltrados.flatMap(obs => 
+            (obs.imagenes || []).map(img => ({ src: img.ruta }))
+        );
+    }, [datosFiltrados]);
+
+    const handleImageClick = (src) => {
+        const slideIndex = slides.findIndex(s => s.src === src);
+        setIndex(slideIndex);
+    };
 
     if (loading) return <p className={styles.loading}>Cargando galería...</p>;
     if (error) return <p className={styles.error}>Error: {error.message}</p>;
@@ -24,42 +48,13 @@ function GaleriaImagenes() {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Galería de Imágenes</h1>
-
-            <div className={styles.filterBar}>
-                <input 
-                    type="text" 
-                    placeholder="Buscar en fotos (ID, KM, texto)..." 
-                    value={searchTerm} 
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className={styles.searchInput}
-                />
-                
-                <select 
-                    value={filterTramo} 
-                    onChange={(e) => setFilterTramo(e.target.value)}
-                    className={styles.filterSelect}
-                >
-                    <option value="Todos">Todos los Tramos</option>
-                    {tramos?.map(t => (
-                        <option key={t.id} value={t.id}>{t.inicio} - {t.destino}</option>
-                    ))}
-                </select>
-
-                <select 
-                    value={sortBy} 
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className={styles.filterSelect}
-                >
-                    <option value="fecha_desc">Fecha (Reciente)</option>
-                    <option value="fecha_asc">Fecha (Antigua)</option>
-                    <option value="km_asc">KM (Menor a Mayor)</option>
-                    <option value="km_desc">KM (Mayor a Menor)</option>
-                </select>
-
-                <button onClick={resetFilters} className={styles.btnClear}>
-                    Limpiar Filtros
-                </button>
-            </div>
+            <FiltrosSeccion
+                tramos={safeTramos}
+                elementos={safeElementos}
+                filtros={filtros}
+                onChange={handleChange}
+                onLimpiar={limpiarFiltros}
+            />
             <Lightbox
                 index={index}
                 slides={slides}
@@ -70,33 +65,48 @@ function GaleriaImagenes() {
                 controller={{ closeOnBackdropClick: true }}
                 zoom={{ maxZoomPixelRatio: 3, zoomInMultiplier: 2 }}
             />
-            {galeriaFiltrada.length > 0 ? (
-                galeriaFiltrada.map(obs => (
-                    <div key={obs.id} className={styles.groupContainer}>
-                        <h3 className={styles.groupHeader}>
-                            ID #{obs.id} 
-                            <small> - {obs.observacion_corta || "Sin descripción corta"}</small>
-                        </h3>
-                        
-                        <div className={styles.imageGrid}>
-                            {obs.imagenes.map((img) => {
-                                const currentSrc = `${img.ruta}`;
-                                return (
+            {datosFiltrados.length > 0 ? (
+                datosFiltrados.map(obs => {
+                    if (!obs.imagenes || obs.imagenes.length === 0) return null;
+                    
+                    return (
+                        <div key={obs.id} className={styles.groupContainer}>
+                            <h3 
+                                className={`${styles.groupHeader} ${styles.clickableHeader}`}
+                                onClick={() => setModalId(obs.id)}
+                                title="Click para ver detalles completos"
+                            >
+                                <span>Reporte: {obs.codigo || `ID ${obs.id}`}</span> 
+                                <small> - {obs.observacion_corta || "Sin descripción corta"}</small>
+                                <span style={{ fontSize: '0.8rem', marginLeft: 'auto', opacity: 0.7 }}>🔍 Ver Detalle</span>
+                            </h3>
+                            
+                            <div className={styles.imageGrid}>
+                                {obs.imagenes.map((img) => (
                                     <div key={img.id} className={styles.imageWrapper}>
                                         <img 
-                                            src={currentSrc} 
+                                            src={img.ruta} 
                                             alt={img.nombre || "Evidencia"}
                                             className={styles.thumbnail}
-                                            onClick={() => setIndex(slides.findIndex(s => s.src === currentSrc))}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleImageClick(img.ruta);
+                                            }}
                                         />
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                ))
+                    );
+                })
             ) : (
                 <p className={styles.noResults}>No se encontraron imágenes con los filtros actuales.</p>
+            )}
+            {modalId && (
+                <ObservacionModal 
+                    observacionId={modalId} 
+                    onClose={() => setModalId(null)} 
+                />
             )}
         </div>
     );

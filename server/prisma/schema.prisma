@@ -34,6 +34,7 @@ model Elemento{
 
 model Observacion{
   id Int @id @default(autoincrement())
+  codigo String @unique @db.VarChar(50)
   kilometro String @db.VarChar(50)
   lat Float?
   lng Float?

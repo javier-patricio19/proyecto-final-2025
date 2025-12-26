@@ -60,7 +60,8 @@ export const useDashboardStats = () => {
         return observaciones?.map(obs => ({
             ...obs,
             lat: obs.lat || 19.4326 + (parseFloat(obs.kilometro) / 100),
-            lng: obs.lng || -99.1332
+            lng: obs.lng || -99.1332,
+            fotoPortada: (obs.imagenes && obs.imagenes.length > 0) ? obs.imagenes[0].ruta : null
         })) || [];
     }, [observaciones]);
 

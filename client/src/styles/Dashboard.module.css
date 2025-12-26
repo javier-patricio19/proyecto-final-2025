@@ -103,6 +103,81 @@
   margin-bottom: 15px;
 }
 
+.popupCard {
+    width: 240px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.popupHeader {
+    position: relative;
+    height: 140px;
+    background-color: var(--bg-color);
+}
+
+.popupImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.popupNoImage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.05);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.popupBadge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    color: #fff;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.Reportado { background-color: var(--danger); }
+.Enproceso { background-color: var(--warning); color: #333; }
+.Completado { background-color: var(--success); }
+
+.popupContent {
+    padding: 12px;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+}
+
+.popupTitle {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.popupText {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    line-height: 1.4;
+    opacity: 0.9;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .chartsSection {
     grid-template-columns: 1fr;

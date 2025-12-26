@@ -1,45 +1,79 @@
 import React from 'react';
-import styles from '../../styles/stylesObservacion/ListaObservaciones.module.css'; 
+import styles from '../../styles/FiltrosSeccion.module.css'; 
 
 const FiltrosSeccion = ({ 
-    searchTerm, setSearchTerm, 
-    filterTramo, setFilterTramo, 
-    filterElemento, setFilterElemento, 
-    filterEstado, setFilterEstado,
-    sortBy, setSortBy,
-    tramos, elementos, estados, onClear 
+    tramos, 
+    elementos, 
+    filtros, 
+    onChange, 
+    onLimpiar 
 }) => {
     return (
-        <div className={styles.filtersContainer}>
-            <input 
-                type="text"
-                placeholder="🔍 Buscar por descripción, kilómetro, recomendación..."
-                className={styles.searchInput}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className={styles.selectGroup}>
-                <select className={styles.filterSelect} onChange={(e) => setFilterTramo(e.target.value)} value={filterTramo}>
-                    <option value="Todos">Todos los tramos</option>
-                    {tramos.map(t => <option key={t.id} value={t.id}>{t.inicio} - {t.destino}</option>)}
-                </select>
+        <div className={styles.container}>
+            <div className={styles.searchWrapper}>
+                <span className={styles.searchIcon}>🔍</span>
+                <input
+                    type="text"
+                    placeholder="Buscar por Código descripción, km, recomendación..."
+                    value={filtros.busqueda}
+                    onChange={(e) => onChange('busqueda', e.target.value)}
+                    className={styles.searchInput}
+                />
+            </div>
+            <div className={styles.filtersGrid}>
+                
+                <div className={styles.selectWrapper}>
+                    <select 
+                        value={filtros.tramoId} 
+                        onChange={(e) => onChange('tramoId', e.target.value)}
+                        className={styles.select}
+                    >
+                        <option value="">🛣️ Todos los Tramos</option>
+                        {tramos.map(t => (
+                            <option key={t.id} value={t.id}>{t.inicio} - {t.destino}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className={styles.selectWrapper}>
+                    <select 
+                        value={filtros.elementoId} 
+                        onChange={(e) => onChange('elementoId', e.target.value)}
+                        className={styles.select}
+                    >
+                        <option value="">🏗️ Todos los Elementos</option>
+                        {elementos.map(e => (
+                            <option key={e.id} value={e.id}>{e.nombre}</option>
+                        ))}
+                    </select>
+                </div>
 
-                <select className={styles.filterSelect} onChange={(e) => setFilterElemento(e.target.value)} value={filterElemento}>
-                    <option value="Todos">Todos los elementos</option>
-                    {elementos.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-                </select>
+                <div className={styles.selectWrapper}>
+                    <select 
+                        value={filtros.estado} 
+                        onChange={(e) => onChange('estado', e.target.value)}
+                        className={styles.select}
+                    >
+                        <option value="">📌 Todos los Estados</option>
+                        <option value="Reportado">Reportado</option>
+                        <option value="En proceso">En proceso</option>
+                        <option value="Completado">Completado</option>
+                    </select>
+                </div>
 
-                <select className={styles.filterSelect} onChange={(e) => setFilterEstado(e.target.value)} value={filterEstado}>
-                    {estados.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <div className={styles.selectWrapper}>
+                    <select 
+                        value={filtros.orden} 
+                        onChange={(e) => onChange('orden', e.target.value)}
+                        className={styles.select}
+                    >
+                        <option value="desc">📅 Más recientes</option>
+                        <option value="asc">📅 Más antiguos</option>
+                    </select>
+                </div>
 
-                <select className={styles.filterSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                    <option value="fecha_desc">📅 Más reciente</option>
-                    <option value="km_asc">🛣️ KM Ascendente</option>
-                    <option value="id_desc">🔢 ID más reciente</option>
-                </select>
-
-                <button onClick={onClear} className={styles.btnClear}>Limpiar Filtros</button>
+                <button onClick={onLimpiar} className={styles.btnClear}>
+                    Limpiar
+                </button>
             </div>
         </div>
     );

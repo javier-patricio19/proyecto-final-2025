@@ -1,4 +1,5 @@
 import { prisma } from "../db.js";
+import { generarCodigoObservacion } from "../utils/CodigoGenerator.js";
 import  fs  from "fs";
 import path from "path";
 
@@ -12,11 +13,32 @@ export const getAll = async () => {
 export const getById = async (id) => {
     return await prisma.observacion.findUnique({
         where: { id: parseInt(id) },
-        include: { imagenes: true },
+        include: { 
+            imagenes: true, 
+            tramo: true,
+            elemento: true
+        },
     });
 };
 
 export const create = async (data, files) => {
+    const tramoInfo = await prisma.tramo.findUnique({
+        where: { id: data.tramoId }
+    });
+
+    const fechaDate = new Date(data.fecha);
+    const startOfDay = new Date(fechaDate); startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(fechaDate); endOfDay.setHours(23, 59, 59, 999);
+
+    const cantidadExistentes = await prisma.observacion.count({
+        where: {
+            tramoId: data.tramoId,
+            fecha: { gte: startOfDay, lte: endOfDay }
+        }
+    });
+    
+    data.codigo = generarCodigoObservacion(tramoInfo, data.fecha, cantidadExistentes);
+
     const newObservacion = await prisma.observacion.create({
         data: data,
     });

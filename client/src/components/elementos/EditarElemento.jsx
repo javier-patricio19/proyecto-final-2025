@@ -1,9 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUpdateElemento } from '../../hooks/elementosHook';
 import styles from '../../styles/stylesGestion/FormGestion.module.css';
 
 export const EditarElemento = ({ elemento, onDataUpdatedCallback, onCancel }) => {
-    const [tipo, setTipo] = useState(elemento.tipo);
+  const topRef = useRef(null);
+  
+      useEffect(() => {
+          setTimeout(() => {
+              if (topRef.current) {
+                  topRef.current.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'start'
+                  });
+              }
+          }, 100);
+      }, [elemento.id]);
+    
+  const [tipo, setTipo] = useState(elemento.tipo);
     const [nombre, setNombre] = useState(elemento.nombre);
     const [descripcion, setDescripcion] = useState(elemento.descripcion);
 
@@ -16,12 +29,13 @@ export const EditarElemento = ({ elemento, onDataUpdatedCallback, onCancel }) =>
     }, [elemento]);
 
     const onSubmit = (e) => {
+      e.preventDefault();
         const data = { tipo, nombre, descripcion };
         handleUpdateSubmit(e, elemento.id, data);
     };
 
     return (
-      <div className={styles.formContainer}>
+      <div ref={topRef} className={styles.formContainer} tabIndex={-1}>
         <form onSubmit={onSubmit}>
           <h2 className={styles.header}>Editar Elemento ID: {elemento.id}</h2>
           

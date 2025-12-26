@@ -91,6 +91,7 @@ export const useObservacionForm = (onSuccessCallback) => {
 };
 
 export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
+    const [codigo, SetCodigo] = useState('');
     const [tramoId, setTramoId] = useState('');
     const [elementoId, setElementoId] = useState('');
     const [kilometro, setKilometro] = useState('');
@@ -121,7 +122,7 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
             try {
                 const data = await fetchObservacionById(observacionId);
                 if (mounted) {
-                    setTramoId(data.tramoId); setElementoId(data.elementoId);
+                    SetCodigo(data.codigo || ''); setTramoId(data.tramoId); setElementoId(data.elementoId);
                     setKilometro(data.kilometro); setCuerpo(data.cuerpo); setCarril(data.carril);
                     setFecha(new Date(data.fecha).toISOString().slice(0, 10));
                     setObservacion(data.observacion); setObservacionCorta(data.observacion_corta);
@@ -157,7 +158,7 @@ export const useUpdateObservacion = (observacionId, onSuccessCallback) => {
         finally { setEncurso(false); }
     };
     return {
-         tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
+        codigo, tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, 
         estado, setEstado, imagenesNuevas, setImagenesNuevas, imagenesExistentes, handleRemoveExistingImage,

@@ -45,11 +45,11 @@ const ObservacionCard = ({
                     </span>
                     
                     <p className={styles.obsTramo}>
-                        {getTramoNombre(item.tramoId)}
+                       {item.codigo} • {getTramoNombre(item.tramoId)}
                     </p>
                     
                     <p className={styles.obsDetails}>
-                        KM: {item.kilometro} • {item.cuerpo} • {item.carril} <br/>
+                        KM: {item.kilometro} • Cuerpo: {item.cuerpo} • Carril: {item.carril} <br/>
                         {getElementoNombre(item.elementoId)}
                     </p>
                 </div>

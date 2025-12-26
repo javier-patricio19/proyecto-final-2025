@@ -6,6 +6,9 @@ import { AgregarTramo } from '../components/tramos/AgregarTramo';
 import { EditarTramo } from '../components/tramos/EditarTramo';
 
 function Tramos() {
+  useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
   const { tramos: fetchedTramos, loading, error } = useFetchTramos();
   const [listaTramos, setListaTramos] = useState([]);
   const [editingTramo, setEditingTramo] = useState(null);

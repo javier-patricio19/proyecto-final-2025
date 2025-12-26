@@ -115,6 +115,25 @@
 }
 .error { color: var(--danger); }
 
+.clickableHeader {
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin-left: -10px;
+}
+
+.clickableHeader:hover {
+    background-color: var(--bg-color);
+    text-decoration: none;
+    color: var(--primary);
+}
+
+.clickableHeader span {
+    text-decoration: underline;
+    text-decoration-color: rgba(52, 152, 219, 0.3);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

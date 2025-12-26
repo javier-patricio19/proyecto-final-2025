@@ -181,19 +181,7 @@ function Dashboard() {
                         </div>
                     </div>
                 )}
-
-                {lineChartData && (
-                    <div className={`${styles.chartContainer} ${styles.fullWidth}`} style={{ marginTop: '20px' }}>
-                        <h3 className={styles.chartTitle}>Historial de Reportes</h3>
-                        <div style={{flex: 1, position: 'relative', minHeight: '300px'}}>
-                            <Line 
-                                data={lineChartData} 
-                                options={chartOptions} 
-                            />
-                        </div>
-                    </div>
-                )}
-
+                
                 {barChartData && (
                     <div className={`${styles.chartContainer} ${styles.fullWidth}`}>
                         <h3 className={styles.chartTitle}>Distribución por Tramo</h3>
@@ -201,6 +189,18 @@ function Dashboard() {
                             <Bar 
                                 data={barChartData} 
                                 options={{...chartOptions, indexAxis: 'y'}} 
+                            />
+                        </div>
+                    </div>
+                )}
+                
+                {lineChartData && (
+                    <div className={`${styles.chartContainer} ${styles.fullWidth}`} style={{ marginTop: '20px' }}>
+                        <h3 className={styles.chartTitle}>Historial de Reportes</h3>
+                        <div style={{flex: 1, position: 'relative', minHeight: '300px'}}>
+                            <Line 
+                                data={lineChartData} 
+                                options={chartOptions} 
                             />
                         </div>
                     </div>
@@ -223,15 +223,38 @@ function Dashboard() {
                                 add: (e) => { if (punto.id === urlId) e.target.openPopup(); }
                             }}
                         >
-                            <Popup>
-                                <strong>ID #{punto.id}</strong><br />
-                                {punto.observacion_corta || 'Sin descripción'}<br />
-                                <span style={{
-                                    color: punto.estado === 'Completado' ? 'var(--success)' : 'var(--danger)',
-                                    fontWeight: 'bold'
-                                }}>
-                                    Estado: {punto.estado}
-                                </span>
+                            <Popup className={styles.customPopupWrapper}>
+                                <div className={styles.popupCard}>
+                                    <div className={styles.popupHeader}>
+                                        {punto.fotoPortada ? (
+                                            <img 
+                                                src={punto.fotoPortada} 
+                                                alt="Evidencia" 
+                                                className={styles.popupImage} 
+                                                loading="lazy"
+                                            />
+                                        ) : (
+                                            <div className={styles.popupNoImage}>Sin Foto</div>
+                                        )}
+                                        <span className={`${styles.popupBadge} ${styles[punto.estado.replace(/\s+/g, '')]}`}>
+                                            {punto.estado}
+                                        </span>
+                                    </div>
+
+                                    <div className={styles.popupContent}>
+                                        <h4 className={styles.popupTitle}>{punto.codigo || `ID: ${punto.id}`}</h4>
+                                        <p className={styles.popupText}>
+                                            {punto.observacion_corta || "Sin descripción disponible."}
+                                        </p>
+                                        
+                                        {/* Link falso para indicar que se puede ver más */}
+                                        <div style={{ marginTop: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '5px' }}>
+                                            <small style={{ color: 'var(--primary)', fontWeight: 'bold' }}>
+                                                📍 KM {punto.kilometro}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </Popup>
                         </Marker>
                     ))}

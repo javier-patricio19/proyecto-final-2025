@@ -1,8 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUpdateTramo } from '../../hooks/tramosHook';
 import styles from '../../styles/stylesGestion/FormGestion.module.css';
 
 export const EditarTramo = ({ tramo, onDataUpdatedCallback, onCancel }) => {
+    const topRef = useRef(null);
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (topRef.current) {
+                topRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start'
+                });
+            }
+        }, 100);
+    }, [tramo.id]);
+
     const [inicio, setInicio] = useState(tramo.inicio);
     const [destino, setDestino] = useState(tramo.destino);
     
@@ -14,12 +27,13 @@ export const EditarTramo = ({ tramo, onDataUpdatedCallback, onCancel }) => {
     }, [tramo]);
 
     const onSubmit = (e) => {
+        e.preventDefault();
         const data = { inicio, destino };
         handleUpdateSubmit(e, tramo.id, data);
     };
 
     return (
-        <div className={styles.formContainer}>
+        <div ref={topRef} className={styles.formContainer} tabIndex={-1}>
             <form onSubmit={onSubmit}>
                 <h2 className={styles.header}>Editar Tramo ID: {tramo.id}</h2>
                 

@@ -6,7 +6,7 @@ import { useFetchElementos } from "../../hooks/elementosHook";
 
 export const EditarObservacion = ({ observacionId, onSuccessCallback, onCancel }) => {
     const {
-        tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
+        codigo, tramoId, setTramoId, elementoId, setElementoId, kilometro, setKilometro,
         cuerpo, setCuerpo, carril, setCarril, fecha, setFecha, observacion, setObservacion,
         observacionCorta, setObservacionCorta, recomendacion, setRecomendacion, estado, setEstado,
         setImagenesNuevas, imagenesExistentes, handleRemoveExistingImage,
@@ -40,7 +40,7 @@ export const EditarObservacion = ({ observacionId, onSuccessCallback, onCancel }
 
     return (
         <form className={styles.mainForm} onSubmit={handleSubmit}>
-            <h2 className={styles.formTitle}>Editar Observación #{observacionId}</h2>
+            <h2 className={styles.formTitle}>Editar Observación {codigo}</h2>
             
             <div className={styles.formRow}>
                 <div className={styles.formGroup}>
