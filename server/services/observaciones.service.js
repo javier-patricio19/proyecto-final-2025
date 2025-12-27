@@ -22,46 +22,72 @@ export const getById = async (id) => {
 };
 
 export const create = async (data, files) => {
-    const tramoInfo = await prisma.tramo.findUnique({
-        where: { id: data.tramoId }
-    });
-
-    const fechaDate = new Date(data.fecha);
-    const startOfDay = new Date(fechaDate); startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(fechaDate); endOfDay.setHours(23, 59, 59, 999);
-
-    const cantidadExistentes = await prisma.observacion.count({
-        where: {
-            tramoId: data.tramoId,
-            fecha: { gte: startOfDay, lte: endOfDay }
-        }
-    });
-    
-    data.codigo = generarCodigoObservacion(tramoInfo, data.fecha, cantidadExistentes);
-
-    const newObservacion = await prisma.observacion.create({
-        data: data,
-    });
-
-    if (files && files.length > 0) {
-        const imagenesData = files.map(file =>({
-            nombre: file.filename,
-            ruta: `/images/${file.filename}`,
-            observacionId: newObservacion.id,
-        }));
-
-        await prisma.imagen.createMany({
-            data: imagenesData,
+    return await prisma.$transaction(async (tx) => {
+        
+        const tramoInfo = await tx.tramo.findUnique({
+            where: { id: data.tramoId }
         });
-    }
 
-    return await prisma.observacion.findUnique({
-        where: { id: newObservacion.id},
-        include: {imagenes: true},
+        const fechaDate = new Date(data.fecha);
+        const startOfDay = new Date(fechaDate); startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(fechaDate); endOfDay.setHours(23, 59, 59, 999);
+
+        const cantidadExistentes = await tx.observacion.count({
+            where: {
+                tramoId: data.tramoId,
+                fecha: { gte: startOfDay, lte: endOfDay }
+            }
+        });
+        
+        data.codigo = generarCodigoObservacion(tramoInfo, data.fecha, cantidadExistentes);
+
+        const newObservacion = await tx.observacion.create({
+            data: data,
+        });
+
+        if (files && files.length > 0) {
+            const imagenesData = files.map(file =>({
+                nombre: file.filename,
+                ruta: `/images/${file.filename}`,
+                observacionId: newObservacion.id,
+            }));
+
+            await tx.imagen.createMany({
+                data: imagenesData,
+            });
+        }
+
+        return await tx.observacion.findUnique({
+            where: { id: newObservacion.id},
+            include: {imagenes: true},
+        });
     });
 };
 
 export const update = async (id, data, newFiles) => {
+    const idInt = parseInt(id);
+
+    if (data.tramoId || data.fecha) {
+        const currentObs = await prisma.observacion.findUnique({ where: { id: idInt } });
+        
+        const targetTramoId = data.tramoId || currentObs.tramoId;
+        const targetFecha = data.fecha ? new Date(data.fecha) : currentObs.fecha;
+
+        const tramoInfo = await prisma.tramo.findUnique({ where: { id: targetTramoId } });
+        
+        const startOfDay = new Date(targetFecha); startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(targetFecha); endOfDay.setHours(23, 59, 59, 999);
+        
+        const count = await prisma.observacion.count({
+            where: {
+                tramoId: targetTramoId,
+                fecha: { gte: startOfDay, lte: endOfDay },
+                id: { not: idInt }
+            }
+        });
+
+        data.codigo = generarCodigoObservacion(tramoInfo, targetFecha, count);
+    }
     const observacionUpdated = await prisma.observacion.update({
         where: { id: parseInt(id) },
         data: data,
@@ -94,8 +120,10 @@ export const deleteObservacion = async (id) => {
 
     for (const imagen of imagenes) {
         const rutaArchivo = path.join(process.cwd(), 'images', path.basename(imagen.ruta));
-        if (fs.existsSync(rutaArchivo)) {
-            fs.unlinkSync(rutaArchivo);
+        try {
+            if (fs.existsSync(rutaArchivo)) fs.unlinkSync(rutaArchivo);
+        } catch (err) {
+            console.warn(`No se pudo borrar archivo físico: ${rutaArchivo}`, err);
         }
     }
 
@@ -110,8 +138,10 @@ export const deleteImagen = async (id) => {
 
     if (imagen) {
         const rutaArchivo = path.join(process.cwd(), 'images', path.basename(imagen.ruta));
-        if (fs.existsSync(rutaArchivo)) {
-            fs.unlinkSync(rutaArchivo);
+        try {
+            if (fs.existsSync(rutaArchivo)) fs.unlinkSync(rutaArchivo);
+        } catch (err) {
+            console.warn(`Error borrando archivo: ${rutaArchivo}`);
         }
         await prisma.imagen.delete({ where: { id: imagenId } });
     }
@@ -125,7 +155,11 @@ export const deleteMultiple = async (ids) => {
 
     imagenes.forEach(img => {
         const ruta = path.join(process.cwd(), 'images', path.basename(img.ruta));
-        if (fs.existsSync(ruta)) fs.unlinkSync(ruta);
+        try {
+            if (fs.existsSync(ruta)) fs.unlinkSync(ruta);
+        } catch (err) {
+            console.warn(`Error borrando archivo masivo: ${ruta}`);
+        }
     });
 
     const deleted = await prisma.observacion.deleteMany({

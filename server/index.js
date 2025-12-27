@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000", 
+  origin: "*", 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -22,15 +22,11 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/images', (req, res, next) => {
-  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Private-Network");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
   res.header("Cross-Origin-Resource-Policy", "cross-origin");
-  res.header("Access-Control-Allow-Private-Network", "true");
-
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Allow-Private-Network');
     return res.sendStatus(204);
   }
   next();

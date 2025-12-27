@@ -23,6 +23,10 @@ export const getObservacionById = async (req, res) => {
 
 export const createObservacion = async (req, res) => {
     try {
+        console.log("--- DEBUG START ---");
+        console.log("Body recibido:", req.body);
+        console.log("Archivos recibidos:", req.files ? req.files.length : 0);
+        
         const archivos = req.files;
         const rawData = req.body;
 
@@ -51,7 +55,15 @@ export const createObservacion = async (req, res) => {
     } catch (error) {
         console.error(error);
         
-        if (req.files) req.files.forEach(f => fs.unlinkSync(f.path));
+        if (req.files) {
+            req.files.forEach(f => {
+                try {
+                    fs.unlinkSync(f.path);
+                } catch (err) {
+                    console.warn(`No se pudo borrar archivo temporal: ${f.path}`);
+                }
+            });
+        }
         res.status(500).json({ error: "Error al crear la observación" });
     }
 };
@@ -63,8 +75,8 @@ export const updateObservacion = async (req, res) => {
         const rawData = req.body;
         
         const data = {};
-        if(rawData.tramoId) data.tramoId = parseInt(rawData.tramoId);
-        if(rawData.elementoId) data.elementoId = parseInt(rawData.elementoId);
+        if(rawData.tramoId !== undefined) data.tramoId = parseInt(rawData.tramoId);
+        if(rawData.elementoId !== undefined) data.elementoId = parseInt(rawData.elementoId);
         if(rawData.fecha) data.fecha = new Date(rawData.fecha);
         if(rawData.lat) data.lat = parseFloat(rawData.lat);
         if(rawData.lng) data.lng = parseFloat(rawData.lng);
@@ -72,7 +84,7 @@ export const updateObservacion = async (req, res) => {
         if(rawData.observacion_corta) data.observacion_corta = rawData.observacion_corta;
         if(rawData.recomendacion) data.recomendacion = rawData.recomendacion;
         if(rawData.estado) data.estado = rawData.estado;
-        if(rawData.kilometro) data.kilometro = rawData.kilometro;
+        if(rawData.kilometro !== undefined) data.kilometro = rawData.kilometro;
         if(rawData.carril) data.carril = rawData.carril;
         if(rawData.cuerpo) data.cuerpo = rawData.cuerpo;
 
@@ -82,7 +94,15 @@ export const updateObservacion = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        if (req.files) req.files.forEach(f => fs.unlinkSync(f.path));
+        if (req.files) {
+            req.files.forEach(f => {
+                try {
+                    fs.unlinkSync(f.path);
+                } catch (err) {
+                    console.warn(`No se pudo borrar archivo temporal: ${f.path}`);
+                }
+            });
+        }
         res.status(500).json({ error: "Error al actualizar" });
     }
 };
