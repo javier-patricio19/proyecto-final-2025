@@ -1,45 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image, ScrollView, Platform } from 'react-native';
-import { Audio } from 'expo-av';
+// ⚠️ NOTA: Ya no usamos Audio de expo-av para grabar archivos, usamos Voice para escuchar directo
+import Voice from '@react-native-voice/voice';
 import { Ionicons } from '@expo/vector-icons';
 import { procesarTextoDictado } from '../utils/VoiceLogic';
 import CustomAlert from '../components/CustomAlert';
-
-const API_URL = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3";
-// Nota: Asegúrate de que este token sea válido
-
-
-const recordingOptions = {
-  android: {
-    extension: '.m4a',
-    outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-    audioEncoder: Audio.AndroidAudioEncoder.AAC,
-    sampleRate: 44100,
-    numberOfChannels: 1,
-    bitRate: 128000,
-  },
-  ios: {
-    extension: '.m4a',
-    outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-    audioQuality: Audio.IOSAudioQuality.MAX,
-    sampleRate: 44100,
-    numberOfChannels: 1,
-    bitRate: 128000,
-    linearPCMBitDepth: 16,
-    linearPCMIsBigEndian: false,
-    linearPCMIsFloat: false,
-  },
-  web: {
-    mimeType: 'audio/webm',
-    bitsPerSecond: 128000,
-  },
-};
 
 const VoiceScreen = ({ route, navigation }) => {
     const { tramoId, fotos, coords } = route.params;
     
     const [grabando, setGrabando] = useState(false);
-    const [recordingObj, setRecordingObj] = useState(null);
+    const [textoParcial, setTextoParcial] = useState(''); // Lo que se ve escribiendo en tiempo real
     const [procesando, setProcesando] = useState(false);
     
     // Alertas
@@ -51,104 +22,92 @@ const VoiceScreen = ({ route, navigation }) => {
         setModalVisible(true);
     };
 
-    const iniciarGrabacion = async () => {
-        try {
-            const permiso = await Audio.requestPermissionsAsync();
-            if (permiso.status !== 'granted') {
-                showCustomAlert('error', 'Permiso denegado', 'Necesitamos acceso al micrófono.');
-                return;
-            }
+    // 1. CONFIGURAR LOS EVENTOS DE VOZ AL CARGAR
+    useEffect(() => {
+        // Vinculamos las funciones de la librería
+        Voice.onSpeechStart = onSpeechStart;
+        Voice.onSpeechEnd = onSpeechEnd;
+        Voice.onSpeechResults = onSpeechResults;
+        Voice.onSpeechPartialResults = onSpeechPartialResults; // <--- LA MAGIA DEL TIEMPO REAL
+        Voice.onSpeechError = onSpeechError;
 
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: true,
-                playsInSilentModeIOS: true,
-            });
-            
-            const { recording } = await Audio.Recording.createAsync(recordingOptions); 
-            
-            setRecordingObj(recording);
-            setGrabando(true);
-        } catch (err) {
-            console.error("Error al iniciar grabación:", err);
-            showCustomAlert('error', 'Error', 'No se pudo iniciar la grabación');
+        return () => {
+            // Limpieza al salir de la pantalla
+            Voice.destroy().then(Voice.removeAllListeners);
+        };
+    }, []);
+
+    const onSpeechStart = (e) => {
+        console.log('🎤 Comenzó a escuchar');
+        setGrabando(true);
+        setTextoParcial('');
+    };
+
+    const onSpeechEnd = (e) => {
+        console.log('🛑 Terminó de escuchar');
+        setGrabando(false);
+    };
+
+    const onSpeechError = (e) => {
+        console.log('❌ Error de voz:', e);
+        setGrabando(false);
+        // Ignoramos errores de "no speech" (cuando hay silencio) para no molestar
+        if (e.error?.message?.includes('7') || e.error?.message?.includes('no speech')) return;
+        
+        showCustomAlert('error', 'Error', 'Hubo un problema con el reconocimiento de voz.');
+    };
+
+    // Se ejecuta FINALMENTE cuando terminas de hablar
+    const onSpeechResults = async (e) => {
+        console.log('✅ Resultados finales:', e.value);
+        if (e.value && e.value.length > 0) {
+            const textoFinal = e.value[0]; // El mejor resultado
+            procesarYNavegar(textoFinal);
         }
     };
 
-const detenerYProcesar = async () => {
-        if (!recordingObj) return;
+    // Se ejecuta MIENTRAS hablas (letras apareciendo)
+    const onSpeechPartialResults = (e) => {
+        console.log('📝 Parcial:', e.value);
+        if (e.value && e.value.length > 0) {
+            setTextoParcial(e.value[0]);
+        }
+    };
 
-        setGrabando(false);
-        setProcesando(true);
-
+    const iniciarGrabacion = async () => {
+        setTextoParcial('');
         try {
-            console.log("🔍 DEBUG: Deteniendo grabación...");
-            await recordingObj.stopAndUnloadAsync();
-            const uri = recordingObj.getURI();
+            // Iniciamos el servicio nativo en Español
+            await Voice.start('es-ES'); 
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
-            // Corrección de URI para Android
-            let uriParaSubir = uri;
-            if (Platform.OS === 'android' && !uri.startsWith('file://')) {
-                uriParaSubir = `file://${uri}`;
-            }
+    const detenerGrabacion = async () => {
+        try {
+            await Voice.stop();
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
-            // 1. LEER EL ARCHIVO LOCAL COMO BLOB
-            console.log("🔍 DEBUG: Convirtiendo archivo a Blob...");
-            const fileResponse = await fetch(uriParaSubir);
-            const audioBlob = await fileResponse.blob();
-            console.log("🔍 DEBUG: Blob creado. Tamaño:", audioBlob.size);
-
+    const procesarYNavegar = async (texto) => {
+        setProcesando(true);
+        try {
+            console.log("⚙️ Procesando texto para formulario...");
             
-            console.log("🔍 DEBUG: Enviando a URL:", API_URL);
-            
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${HF_TOKEN}`,
-                    // CAMBIO CLAVE: Decirle al servidor que es un contenedor MP4 genérico
-                    "Content-Type": "audio/mp4", 
-                },
-                body: audioBlob,
-            });
-
-            console.log("🔍 DEBUG: Respuesta Status:", response.status);
-
-            // 4. LEER RESPUESTA
-            const responseText = await response.text();
-            // console.log("🔍 DEBUG: Cuerpo de la respuesta (Raw):", responseText);
-
-            // 5. PARSEAR
-            let data;
-            try {
-                data = JSON.parse(responseText);
-                console.log("🔍 DEBUG: JSON Parseado correctamente:", data);
-            } catch (e) {
-                console.error("🔍 DEBUG: Falló el JSON.parse.");
-                throw new Error(`El servidor devolvió: "${responseText.substring(0, 50)}..." (Status: ${response.status})`);
-            }
-
-            if (data.error) {
-                throw new Error(JSON.stringify(data.error));
-            }
-
-            const textoTranscrito = data.text;
-            
-            if (!textoTranscrito) throw new Error("La API no devolvió campo 'text'.");
-
-            // ÉXITO
-            console.log("✅ ÉXITO: Transcripción recibida:", textoTranscrito);
-            
-            // Procesar lógica de negocio
+            // Procesar lógica de negocio (usando tu misma función de siempre)
             const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: '' };
-            const datosDetectados = await procesarTextoDictado(textoTranscrito, formBase);
+            const datosDetectados = await procesarTextoDictado(texto, formBase);
 
+            setProcesando(false);
             navigation.navigate('FormularioObservacion', { tramoId, fotos, coords, datosDetectados });
 
         } catch (error) {
-            console.error("❌ ERROR FINAL:", error);
-            showCustomAlert('error', 'Error al procesar', error.message);
-        } finally {
+            console.error("❌ ERROR LOGICA:", error);
             setProcesando(false);
-            setRecordingObj(null);
+            showCustomAlert('error', 'Error al procesar', error.message);
         }
     };
 
@@ -164,13 +123,21 @@ const detenerYProcesar = async () => {
             </View>
 
             <View style={styles.content}>
+                
                 <Text style={styles.title}>
-                    {procesando ? "Analizando audio..." : (grabando ? "🔴 Escuchando..." : "Presiona para grabar")}
+                    {procesando ? "Procesando datos..." : (grabando ? "Escuchando..." : "Presiona para dictar")}
                 </Text>
+
+                {/* ZONA DE TEXTO EN TIEMPO REAL */}
+                <View style={styles.realTimeContainer}>
+                    <Text style={styles.realTimeText}>
+                        {textoParcial || (grabando ? "..." : "El texto aparecerá aquí mientras hablas")}
+                    </Text>
+                </View>
                 
                 <TouchableOpacity 
                     style={[styles.micButton, grabando && styles.micActive]} 
-                    onPress={grabando ? detenerYProcesar : iniciarGrabacion}
+                    onPress={grabando ? detenerGrabacion : iniciarGrabacion}
                     disabled={procesando}
                 >
                      {procesando ? (
@@ -181,9 +148,9 @@ const detenerYProcesar = async () => {
                 </TouchableOpacity>
 
                 <View style={styles.hintContainer}>
-                    <Text style={styles.hintTitle}>Sugerencia de dictado:</Text>
+                    <Text style={styles.hintTitle}>Dictado Nativo</Text>
                     <Text style={styles.hint}>
-                        "Elemento Señalización, Kilómetro 45, Cuerpo B, Carril 1. Se observa pintura desgastada..."
+                        Usa el motor de voz de tu celular. Funciona offline en la mayoría de dispositivos modernos.
                     </Text>
                 </View>
             </View>
@@ -204,8 +171,28 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f5f5' },
     thumbHeader: { width: 60, height: 60, borderRadius: 5, marginRight: 8, borderWidth: 1, borderColor: '#555' },
     content: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    title: { fontSize: 24, marginBottom: 40, fontWeight: 'bold', color: '#333' },
+    title: { fontSize: 24, marginBottom: 20, fontWeight: 'bold', color: '#333' },
     
+    // Estilo para el texto en tiempo real
+    realTimeContainer: {
+        width: '100%',
+        minHeight: 100,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 30,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    realTimeText: {
+        fontSize: 18,
+        color: '#333',
+        textAlign: 'center',
+        fontStyle: 'italic'
+    },
+
     micButton: { 
         width: 120, height: 120, borderRadius: 60, 
         backgroundColor: '#007AFF', 
@@ -214,9 +201,9 @@ const styles = StyleSheet.create({
     },
     micActive: { backgroundColor: '#F44336', transform: [{scale: 1.1}] },
     
-    hintContainer: { marginTop: 60, padding: 20, backgroundColor: '#e3f2fd', borderRadius: 10 },
-    hintTitle: { fontWeight: 'bold', color: '#1565c0', marginBottom: 5 },
-    hint: { color: '#555', fontStyle: 'italic', textAlign: 'center' }
+    hintContainer: { marginTop: 40, padding: 20 },
+    hintTitle: { fontWeight: 'bold', color: '#555', marginBottom: 5, textAlign: 'center' },
+    hint: { color: '#777', fontStyle: 'italic', textAlign: 'center' }
 });
 
 export default VoiceScreen;

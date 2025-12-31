@@ -34,14 +34,6 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Permite usar la cámara.",
-          "microphonePermission": "Permite usar el micrófono."
-        }
-      ],
       [
         "expo-build-properties",
         {
@@ -49,9 +41,19 @@
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "useFrameworks": "static"
           }
         }
-      ]
+      ], 
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Necesitamos acceso al micrófono para grabar notas de voz."
+        }
+      ],
+      "expo-router"
     ],
     "extra": {
       "eas": {
