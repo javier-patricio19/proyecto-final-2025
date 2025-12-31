@@ -5,6 +5,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { initDatabase } from './src/database/db';
 import { syncCatalogos } from './src/services/syncService';
 import TramosScreen from './src/screens/TramoScreen';
+import DetalleTramoScreen from "./src/screens/DetalleTramoScreen";
+import VoiceScreen from './src/screens/VoiceScreen';
+import FormularioObservacionScreen from "./src/screens/FormularioObservacionScreen";
+import CapturaScreen from './src/screens/CapturaScreen';  
+import ListaObservacionesScreen from "./src/screens/ListaObservacionesScreen";
 
 const Stack = createStackNavigator();
 
@@ -49,6 +54,37 @@ export default function App() {
           component={TramosScreen} 
           options={{ title: 'Seleccionar Tramo' }} 
         />
+
+        <Stack.Screen 
+          name="DetalleTramo" 
+          component={DetalleTramoScreen} 
+          options={{ title: 'Opciones de Recorrido' }} 
+        />
+
+        <Stack.Screen 
+          name="CapturaCamara" 
+          component={CapturaScreen} 
+          options={{ title: 'Tomando Evidencia', headerShown: false }} 
+        />
+
+        <Stack.Screen 
+          name="VoiceRecord" 
+          component={VoiceScreen} 
+          options={{ title: 'Dictar Evidencia' }} 
+        />
+
+        <Stack.Screen 
+          name="FormularioObservacion" 
+          component={FormularioObservacionScreen} 
+          options={{ title: 'Nueva Observación' }} 
+        />
+        
+        <Stack.Screen 
+          name="ListaObservaciones" 
+          component={ListaObservacionesScreen} 
+          options={{ title: 'Lista de observaciones' }} 
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
