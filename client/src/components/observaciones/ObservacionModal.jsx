@@ -133,7 +133,7 @@ const ObservacionModal = ({ observacionId, onClose }) => {
                         <div className={styles.imageScroll}>
                             {data.imagenes.map((img) => (
                                 <div key={img.id} className={styles.imgWrapper}>
-                                    <img src={img.ruta} alt="Evidencia" onClick={() => window.open(img.ruta, '_blank')} />
+                                    <img src={img.ruta} alt="Evidencia"/>
                                 </div>
                             ))}
                         </div>
