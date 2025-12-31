@@ -35,23 +35,29 @@
     },
     "plugins": [
       "./withVoiceFix.js",
+      "./withJetifier.js",
       [
         "expo-build-properties",
         {
           "android": {
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0"
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "2.1.20",
+            "extraGradleProps": {
+              "android.useAndroidX": "true",
+              "android.enableJetifier": "true"
+            }
           },
           "ios": {
             "useFrameworks": "static"
           }
         }
-      ], 
+      ],
       [
         "expo-av",
         {
-          "microphonePermission": "Necesitamos acceso al micrófono para grabar notas de voz."
+          "microphonePermission": "Necesitamos acceso al micrófono."
         }
       ],
       "expo-router"
