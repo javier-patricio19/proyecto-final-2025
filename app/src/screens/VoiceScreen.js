@@ -7,7 +7,7 @@ import CustomAlert from '../components/CustomAlert';
 
 const API_URL = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3";
 // Nota: Asegúrate de que este token sea válido
-const HF_TOKEN = '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'; 
+
 
 const recordingOptions = {
   android: {
