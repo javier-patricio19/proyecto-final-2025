@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import Voice from '@react-native-voice/voice';
-import { procesarTextoDictado } from '../utils/VoiceLogic'; // Ajusta la ruta si es necesario
+import { procesarTextoDictado } from '../utils/VoiceLogic';
 
 export const useVoiceScreen = (navigation, routeParams) => {
-    const { tramoId, fotos, coords } = routeParams;
+    const { tramoId, tramoNombre, fotos, coords } = routeParams;
 
     const [grabando, setGrabando] = useState(false);
     const [textoParcial, setTextoParcial] = useState('');
@@ -93,7 +93,7 @@ export const useVoiceScreen = (navigation, routeParams) => {
             setProcesando(false);
             // Navegación
             navigation.navigate('FormularioObservacion', { 
-                tramoId, fotos, coords, datosDetectados 
+                tramoId, tramoNombre, fotos, coords, datosDetectados 
             });
 
         } catch (error) {

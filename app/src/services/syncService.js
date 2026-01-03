@@ -1,76 +1,73 @@
 import axios from 'axios';
 import db from '../database/db';
 
-// IMPORTANTE: Usa tu IP real aquí (ejemplo: 192.168.1.65)
-const API_URL = "http://192.168.101.64:5000/api"; 
+const API_URL = "http://192.168.101.41:5000/api"; 
 
 export const syncCatalogos = async () => {
     try {
-        console.log("Iniciando descarga desde:", API_URL);
+        console.log("⬇️ Iniciando descarga de catálogos...");
         
-        const resTramos = await axios.get(`${API_URL}/tramos`, { timeout: 5000 });
-        const resElementos = await axios.get(`${API_URL}/elementos`, { timeout: 5000 });
+        const [resTramos, resElementos] = await Promise.all([
+            axios.get(`${API_URL}/tramos`, { timeout: 10000 }),
+            axios.get(`${API_URL}/elementos`, { timeout: 10000 })
+        ]);
 
-        // Guardar en la BD local
+        // Guardar en la BD local con Transacción
         await db.withTransactionAsync(async () => {
             await db.runAsync('DELETE FROM tramos');
             for (const t of resTramos.data) {
-                await db.runAsync('INSERT INTO tramos (id, inicio, destino) VALUES (?, ?, ?)', [t.id, t.inicio, t.destino]);
+                await db.runAsync(
+                    'INSERT OR REPLACE INTO tramos (id, inicio, destino) VALUES (?, ?, ?)', 
+                    [t.id, t.inicio, t.destino]
+                );
             }
 
             await db.runAsync('DELETE FROM elementos');
             for (const e of resElementos.data) {
-                await db.runAsync('INSERT INTO elementos (id, tipo, nombre) VALUES (?, ?, ?)', [e.id, e.tipo, e.nombre]);
+                await db.runAsync(
+                    'INSERT OR REPLACE INTO elementos (id, tipo, nombre) VALUES (?, ?, ?)', 
+                    [e.id, e.tipo, e.nombre]
+                );
             }
         });
 
-        console.log("Sincronización exitosa.");
+        console.log("✅ Catálogos sincronizados.");
         return true;
     } catch (error) {
-        console.error("Error en syncCatalogos:", error.message);
+        console.error("❌ Error en syncCatalogos:", error.message);
         return false;
     }
 };
 
 export const getTramosLocales = async () => {
     try {
-        const resultados = await db.getAllAsync('SELECT * FROM tramos');
-        return resultados;
+        return await db.getAllAsync('SELECT * FROM tramos ORDER BY inicio ASC'); 
     } catch (error) {
-        console.error("Error al leer tramos locales:", error);
+        console.error("Error al leer tramos:", error);
         return [];
     }
 };
 
 export const subirDatosPendientes = async () => {
     try {
-        await db.runAsync('DELETE FROM imagenes WHERE observacionId IN (SELECT id FROM observaciones WHERE sincronizado = 1)');
-        await db.runAsync('DELETE FROM observaciones WHERE sincronizado = 1');
-        
-        // 1. Buscar observaciones pendientes
         const pendientes = await db.getAllAsync('SELECT * FROM observaciones WHERE sincronizado = 0');
         
         if (pendientes.length === 0) {
-            return { success: true, message: "No hay datos pendientes." };
+            return { success: true, message: "No hay datos pendientes por subir." };
         }
 
+        console.log(`☁️ Subiendo ${pendientes.length} observaciones...`);
         let subidos = 0;
         let errores = 0;
 
         for (const obs of pendientes) {
             try {
-                // 2. Buscar las fotos de esta observación
+                // 2. Buscar fotos
                 const fotos = await db.getAllAsync('SELECT uri FROM imagenes WHERE observacionId = ?', [obs.id]);
 
-                // 3. Armar el FormData
+
                 const formData = new FormData();
 
-                // Datos de texto
-                // Si es código temporal, NO lo enviamos.
-                if (!obs.codigo.startsWith('TEMP-')) {
-                    formData.append('codigo', obs.codigo);
-                }
-                
                 formData.append('kilometro', obs.kilometro);
                 formData.append('lat', String(obs.lat));
                 formData.append('lng', String(obs.lng));
@@ -78,11 +75,15 @@ export const subirDatosPendientes = async () => {
                 formData.append('carril', obs.carril);
                 formData.append('fecha', obs.fecha);
                 formData.append('observacion', obs.observacion);
-                formData.append('observacion_corta', obs.observacion_corta);
-                formData.append('recomendacion', obs.recomendacion);
+                formData.append('observacion_corta', obs.observacion_corta || ''); 
+                formData.append('recomendacion', obs.recomendacion || '');
                 formData.append('estado', obs.estado);
                 formData.append('tramoId', String(obs.tramoId));
                 formData.append('elementoId', String(obs.elementoId));
+
+                if (obs.codigo && !obs.codigo.startsWith('TEMP-')) {
+                    formData.append('codigo', obs.codigo);
+                }
 
                 // Imágenes
                 fotos.forEach((foto) => {
@@ -97,19 +98,21 @@ export const subirDatosPendientes = async () => {
                     });
                 });
 
-                // 4. ENVIAR AL SERVIDOR
+                // 4. ENVIAR
                 await axios.post(`${API_URL}/observaciones`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
-                    timeout: 10000 
+                    timeout: 15000 
                 });
 
+                // 5. LIMPIEZA POST-SUBIDA
+                // Borramos solo si el servidor respondió OK (200/201)
                 await db.runAsync('DELETE FROM imagenes WHERE observacionId = ?', [obs.id]);
                 await db.runAsync('DELETE FROM observaciones WHERE id = ?', [obs.id]);
                 
                 subidos++;
 
             } catch (error) {
-                console.error(`Error subiendo obs ID ${obs.id}:`, error);
+                console.error(`❌ Falló obs ID ${obs.id}:`, error.message);
                 errores++;
             }
         }
@@ -118,11 +121,11 @@ export const subirDatosPendientes = async () => {
             success: true, 
             subidos, 
             errores, 
-            message: `Se subieron y limpiaron ${subidos} observaciones.` 
+            message: `Proceso finalizado. Subidos: ${subidos}, Errores: ${errores}` 
         };
 
     } catch (error) {
-        console.error("Error general en subida:", error);
-        return { success: false, message: error.message };
+        console.error("Error general subiendo datos:", error);
+        return { success: false, message: "Error de conexión o base de datos." };
     }
 };

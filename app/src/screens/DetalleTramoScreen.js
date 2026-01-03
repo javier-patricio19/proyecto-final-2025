@@ -1,22 +1,39 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+
+// Imports SoC
+import { getStyles } from '../styles/DetalleTramoScreen.styles';
+import { useDetalleTramo } from '../hooks/useDetalleTramo';
 
 const DetalleTramoScreen = ({ route, navigation }) => {
-    // Recibimos los datos del tramo que pasamos desde la pantalla anterior
-    const { tramoId, tramoNombre } = route.params;
+    // 1. Tema Global
+    const theme = useColorScheme();
+    const isDark = theme === 'dark';
+    const styles = getStyles(isDark);
+
+    // 2. Lógica (Hook)
+    const { 
+        tramoNombre, 
+        irACaptura, 
+        irALista 
+    } = useDetalleTramo(navigation, route.params);
 
     return (
         <View style={styles.container}>
+            
+            {/* Encabezado */}
             <View style={styles.headerContainer}>
                 <Text style={styles.label}>Estás recorriendo:</Text>
                 <Text style={styles.tramoTitle}>{tramoNombre}</Text>
             </View>
 
+            {/* Botones de Acción */}
             <View style={styles.actionsContainer}>
+                
                 {/* Botón 1: Crear Nueva Observación */}
                 <TouchableOpacity 
                     style={[styles.button, styles.createButton]}
-                    onPress={() => navigation.navigate('CapturaCamara', { tramoId })}
+                    onPress={irACaptura}
                 >
                     <Text style={styles.buttonText}>+ Nueva Observación</Text>
                     <Text style={styles.buttonSubtext}>Reportar hallazgo</Text>
@@ -25,39 +42,15 @@ const DetalleTramoScreen = ({ route, navigation }) => {
                 {/* Botón 2: Ver Lista */}
                 <TouchableOpacity 
                     style={[styles.button, styles.listButton]}
-                    onPress={() => navigation.navigate('ListaObservaciones', { tramoId })}
+                    onPress={irALista}
                 >
                     <Text style={styles.buttonText}>Ver Observaciones</Text>
                     <Text style={styles.buttonSubtext}>Revisar lo capturado hoy</Text>
                 </TouchableOpacity>
+
             </View>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f5f5f5', padding: 20 },
-    headerContainer: { marginBottom: 40, marginTop: 20 },
-    label: { fontSize: 16, color: '#666' },
-    tramoTitle: { fontSize: 24, fontWeight: 'bold', color: '#333' },
-    
-    actionsContainer: { flex: 1, justifyContent: 'center', gap: 20 },
-    
-    button: {
-        padding: 30,
-        borderRadius: 15,
-        alignItems: 'center',
-        elevation: 4, // Sombra en Android
-        shadowColor: '#000', // Sombra en iOS
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-    },
-    createButton: { backgroundColor: '#007AFF' }, // Azul para acción principal
-    listButton: { backgroundColor: '#34C759' },   // Verde para ver lista (o gris oscuro si prefieres)
-    
-    buttonText: { color: '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 5 },
-    buttonSubtext: { color: 'rgba(255,255,255,0.8)', fontSize: 14 }
-});
 
 export default DetalleTramoScreen;

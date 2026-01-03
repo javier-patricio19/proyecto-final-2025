@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { View, Image, ActivityIndicator, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useCallback } from 'react';
+import { View, Image, ActivityIndicator, StyleSheet, useColorScheme, StatusBar } from 'react-native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import * as SplashScreen from 'expo-splash-screen';
 import { createStackNavigator } from '@react-navigation/stack';
-import { initDatabase } from './src/database/db';
-import { syncCatalogos } from './src/services/syncService';
+import { Colors } from "./src/theme/Colors";
+import { useAppInit } from "./src/hooks/useAppInit";
 import TramosScreen from './src/screens/TramoScreen';
 import DetalleTramoScreen from "./src/screens/DetalleTramoScreen";
 import VoiceScreen from './src/screens/VoiceScreen';
@@ -11,86 +12,63 @@ import FormularioObservacionScreen from "./src/screens/FormularioObservacionScre
 import CapturaScreen from './src/screens/CapturaScreen';  
 import ListaObservacionesScreen from "./src/screens/ListaObservacionesScreen";
 
+
+SplashScreen.preventAutoHideAsync();
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [isReady, setIsReady] = useState(false);
+  // 1. Llamamos al hook de carga
+  const appIsReady = useAppInit();
+  
+  // 2. Detectamos tema para la UI
+  const scheme = useColorScheme();
+  const isDark = scheme === 'dark';
+  const themeColors = isDark ? Colors.dark : Colors.light;
 
-  useEffect(() => {
-    async function prepare() {
-      try {
-        await initDatabase(); // Crea las tablas
-        await syncCatalogos(); // Intenta bajar datos del server
-      } catch (e) {
-        console.warn("Error en carga:", e);
-      } finally {
-        // Simulamos un pequeño retraso para que el logo se vea 2 segundos
-        setTimeout(() => setIsReady(true), 2000);
-      }
+  // 3. FUNCIÓN MÁGICA: Se ejecuta cuando la vista raíz ya se dibujó
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      // Solo ocultamos el splash cuando la app está lista Y pintada
+      await SplashScreen.hideAsync();
     }
-    prepare();
-  }, []);
+  }, [appIsReady]);
 
-  // Pantalla de Carga (Splash)
-  if (!isReady) {
-    return (
-      <View style={styles.splash}>
-        <Image 
-          source={require('./assets/logo.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
+  // 4. Si no está lista, retornamos null. 
+  // Esto mantiene el Splash Nativo visible (no se ve pantalla blanca)
+  if (!appIsReady) {
+    return null;
   }
 
-  // Navegación Real
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: '#007AFF' }, headerTintColor: '#fff' }}>
-        <Stack.Screen 
-          name="Tramos" 
-          component={TramosScreen} 
-          options={{ title: 'Seleccionar Tramo' }} 
-        />
-
-        <Stack.Screen 
-          name="DetalleTramo" 
-          component={DetalleTramoScreen} 
-          options={{ title: 'Opciones de Recorrido' }} 
-        />
-
-        <Stack.Screen 
-          name="CapturaCamara" 
-          component={CapturaScreen} 
-          options={{ title: 'Tomando Evidencia', headerShown: false }} 
-        />
-
-        <Stack.Screen 
-          name="VoiceRecord" 
-          component={VoiceScreen} 
-          options={{ title: 'Dictar Evidencia' }} 
-        />
-
-        <Stack.Screen 
-          name="FormularioObservacion" 
-          component={FormularioObservacionScreen} 
-          options={{ title: 'Nueva Observación' }} 
+    // Envolvemos todo en una View con onLayout
+    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+      <NavigationContainer theme={isDark ? DarkTheme : DefaultTheme}>
+        <StatusBar 
+            barStyle={isDark ? "light-content" : "dark-content"} 
+            backgroundColor={themeColors.headerBackground} 
         />
         
-        <Stack.Screen 
-          name="ListaObservaciones" 
-          component={ListaObservacionesScreen} 
-          options={{ title: 'Lista de observaciones' }} 
-        />
+        <Stack.Navigator 
+          screenOptions={{ 
+            headerStyle: { 
+              backgroundColor: isDark ? '#1E1E1E' : themeColors.primary,
+              shadowColor: 'transparent',
+              elevation: 0
+            }, 
+            headerTintColor: '#fff',
+            headerTitleStyle: { fontWeight: 'bold' },
+            cardStyle: { backgroundColor: themeColors.background }
+          }}
+        >
+          <Stack.Screen name="Tramos" component={TramosScreen} options={{ title: 'Seleccionar Tramo' }} />
+          <Stack.Screen name="DetalleTramo" component={DetalleTramoScreen} options={{ title: 'Opciones' }} />
+          <Stack.Screen name="CapturaCamara" component={CapturaScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="VoiceRecord" component={VoiceScreen} options={{ title: 'Dictar Evidencia' }} />
+          <Stack.Screen name="FormularioObservacion" component={FormularioObservacionScreen} options={{ title: 'Nueva Observación' }} />
+          <Stack.Screen name="ListaObservaciones" component={ListaObservacionesScreen} options={{ title: 'Lista' }} />
 
-      </Stack.Navigator>
-    </NavigationContainer>
+        </Stack.Navigator>
+      </NavigationContainer>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  splash: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' },
-  logo: { width: 250, height: 250, marginBottom: 20 }
-});

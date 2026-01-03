@@ -1,84 +1,25 @@
-import React, { useEffect, useState, useLayoutEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { getTramosLocales, subirDatosPendientes } from '../services/syncService';
+import React from 'react';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, useColorScheme } from 'react-native';
+import { getStyles } from '../styles/TramoScreen.styles';
+import { useTramoScreen } from '../hooks/useTramo';
 import CustomAlert from "../components/CustomAlert";
 
 const TramosScreen = ({ navigation }) => {
-    const [tramos, setTramos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [sincronizando, setSincronizando] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [modalConfig, setModalConfig] = useState({
-        type: 'info',
-        title: '',
-        message: '',
-        buttons: []
-    });
+    // 1. Tema
+    const theme = useColorScheme();
+    const isDark = theme === 'dark';
+    const styles = getStyles(isDark);
+    const activityColor = isDark ? '#FFFFFF' : '#007AFF';
 
-    
-    const showCustomAlert = (type, title, message, buttons = []) => {
-        setModalConfig({ type, title, message, buttons });
-        setModalVisible(true);
-    };
-    // Configurar botón en el Header
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity 
-                    onPress={handleSync} 
-                    disabled={sincronizando}
-                    style={{ marginRight: 15 }}
-                >
-                    {sincronizando ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>SUBIR ☁️</Text>
-                    )}
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation, sincronizando]);
+    // 2. Lógica
+    const { 
+        tramos, 
+        loading, 
+        alertConfig, 
+        hideAlert 
+    } = useTramoScreen(navigation);
 
-    const handleSync = async () => {
-        setSincronizando(true);
-        
-        const resultado = await subirDatosPendientes();
-        
-        setSincronizando(false);
-        
-        if (resultado.success) {
-            showCustomAlert(
-                'success', 
-                'Sincronización Completa', 
-                resultado.message, // "Se subieron X observaciones..."
-                [{ text: 'Excelente' }]
-            );
-        } else {
-           showCustomAlert(
-                'error', 
-                'Error de Conexión', 
-                'Hubo un problema al conectar con el servidor. Verifica tu internet e intenta de nuevo.'
-            );
-        }
-    };
-
-    const cargarDatos = async () => {
-        try {
-            setLoading(true);
-            const data = await getTramosLocales();
-            setTramos(data);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        cargarDatos();
-    }, []);
-
-    // ... (El resto del renderItem y FlatList sigue igual) ...
+    // Render de cada tarjeta
     const renderItem = ({ item }) => (
         <TouchableOpacity 
             style={styles.card}
@@ -88,11 +29,17 @@ const TramosScreen = ({ navigation }) => {
             })}
         >
             <Text style={styles.title}>{item.inicio} - {item.destino}</Text>
-             <Text style={styles.subtitle}>Toca para iniciar recorrido</Text>
+            <Text style={styles.subtitle}>Toca para iniciar recorrido ➝</Text>
         </TouchableOpacity>
     );
 
-    if (loading) return <View style={styles.center}><ActivityIndicator/></View>;
+    if (loading) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color={activityColor} />
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -100,25 +47,19 @@ const TramosScreen = ({ navigation }) => {
                 data={tramos}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
+                contentContainerStyle={{ paddingBottom: 20 }}
             />
+
             <CustomAlert 
-                visible={modalVisible}
-                type={modalConfig.type}
-                title={modalConfig.title}
-                message={modalConfig.message}
-                buttons={modalConfig.buttons}
-                onClose={() => setModalVisible(false)}
+                visible={alertConfig.visible}
+                type={alertConfig.type}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={hideAlert}
             />
         </View>
     );
 };
-
-// ... Styles siguen igual ...
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f0f0f0', padding: 15 },
-    center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    card: { backgroundColor: 'white', padding: 20, borderRadius: 12, marginBottom: 12, elevation: 2 },
-    title: { fontSize: 18, fontWeight: 'bold', color: '#333' }
-});
 
 export default TramosScreen;

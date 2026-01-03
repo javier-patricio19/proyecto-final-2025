@@ -49,7 +49,7 @@ export const generarReportePDF = async (observaciones) => {
             startY: 35,
             head: [['Campo', 'Información']],
             body: [
-                ['ID de Registro', String(obs.id)],
+                ['Codigo', String(obs.codigo)],
                 ['Estado Actual', String(obs.estado)],
                 ['Ubicación', `KM ${obs.kilometro} - Cuerpo ${obs.cuerpo} - Carril ${obs.carril}`],
                 ['Fecha Observación', new Date(obs.fecha).toLocaleDateString()],

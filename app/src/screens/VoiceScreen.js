@@ -1,12 +1,15 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, ScrollView, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { styles } from '../styles/VoiceScreen.styles';
+import { getStyles } from '../styles/VoiceScreen.styles';
 import { useVoiceScreen } from '../hooks/useVoiceScreen';
 import CustomAlert from "../components/CustomAlert";
 
 const VoiceScreen = ({ route, navigation }) => {
-    // Usamos nuestro Hook personalizado
+    const theme = useColorScheme(); 
+    const isDark = theme === 'dark';
+    const styles = getStyles(isDark);
+
     const { 
         grabando, 
         textoParcial, 
@@ -19,7 +22,6 @@ const VoiceScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            {/* Tira de fotos superior */}
             <View style={styles.headerContainer}>
                 <ScrollView horizontal contentContainerStyle={styles.thumbScrollView}>
                     {fotos && fotos.map((uri, i) => (
@@ -33,14 +35,12 @@ const VoiceScreen = ({ route, navigation }) => {
                     {procesando ? "Analizando..." : (grabando ? "Escuchando..." : "Presiona para dictar")}
                 </Text>
 
-                {/* Área de texto en tiempo real */}
                 <View style={styles.realTimeContainer}>
                     <Text style={styles.realTimeText}>
                         {textoParcial || (grabando ? "..." : "El texto aparecerá aquí...")}
                     </Text>
                 </View>
                 
-                {/* Botón Micrófono */}
                 <TouchableOpacity 
                     style={[styles.micButton, grabando && styles.micActive]} 
                     onPress={toggleGrabacion}
@@ -54,14 +54,13 @@ const VoiceScreen = ({ route, navigation }) => {
                 </TouchableOpacity>
 
                 <View style={styles.hintContainer}>
-                    <Text style={styles.hintTitle}>Modo Dictado</Text>
+                    <Text style={styles.hintTitle}>Ejemplo de dictado: </Text>
                     <Text style={styles.hint}>
                         Elemento: "cuneta",kilometro: "45" carril: "1", cuerpo: "A", Observacion:"LLena de basura que corta el flujo", Recomendacion: "ir a quitar la basura antes de que se desborde" 
                     </Text>
                 </View>
             </View>
 
-            {/* Alerta */}
             <CustomAlert 
                 visible={alertConfig.visible}
                 type={alertConfig.type}
