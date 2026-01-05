@@ -7,7 +7,6 @@ function AgregarObservacion() {
     usePageTitle("Agregar Observación");
 
     const handleSuccess = (nuevaObservacion) => {
-        console.log("handleSuccess ejecutado. Navegando a ver-observaciones.");
         toast.success(`Observación creada con Exito.`);
         navigate("/verObservaciones");
     };

@@ -1,12 +1,10 @@
 import axios from 'axios';
 import db from '../database/db';
 
-const API_URL = "http://192.168.101.41:5000/api"; 
+const API_URL = "http://192.168.101.56:5000/api"; 
 
 export const syncCatalogos = async () => {
     try {
-        console.log("⬇️ Iniciando descarga de catálogos...");
-        
         const [resTramos, resElementos] = await Promise.all([
             axios.get(`${API_URL}/tramos`, { timeout: 10000 }),
             axios.get(`${API_URL}/elementos`, { timeout: 10000 })
@@ -31,7 +29,6 @@ export const syncCatalogos = async () => {
             }
         });
 
-        console.log("✅ Catálogos sincronizados.");
         return true;
     } catch (error) {
         console.error("❌ Error en syncCatalogos:", error.message);
@@ -56,7 +53,6 @@ export const subirDatosPendientes = async () => {
             return { success: true, message: "No hay datos pendientes por subir." };
         }
 
-        console.log(`☁️ Subiendo ${pendientes.length} observaciones...`);
         let subidos = 0;
         let errores = 0;
 

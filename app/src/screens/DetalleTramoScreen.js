@@ -1,17 +1,21 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, useColorScheme } from 'react-native';
+// 1. IMPORTAMOS ScrollView y useWindowDimensions
+import { View, Text, TouchableOpacity, ScrollView, useColorScheme, useWindowDimensions } from 'react-native';
 
-// Imports SoC
 import { getStyles } from '../styles/DetalleTramoScreen.styles';
 import { useDetalleTramo } from '../hooks/useDetalleTramo';
 
 const DetalleTramoScreen = ({ route, navigation }) => {
-    // 1. Tema Global
+    // 2. DETECTAMOS ORIENTACIÓN
+    const { width, height } = useWindowDimensions();
+    const isLandscape = width > height;
+
     const theme = useColorScheme();
     const isDark = theme === 'dark';
-    const styles = getStyles(isDark);
+    
+    // 3. PASAMOS isLandscape
+    const styles = getStyles(isDark, isLandscape);
 
-    // 2. Lógica (Hook)
     const { 
         tramoNombre, 
         irACaptura, 
@@ -19,36 +23,39 @@ const DetalleTramoScreen = ({ route, navigation }) => {
     } = useDetalleTramo(navigation, route.params);
 
     return (
+        // 4. USAMOS ScrollView EN LUGAR DE View
         <View style={styles.container}>
-            
-            {/* Encabezado */}
-            <View style={styles.headerContainer}>
-                <Text style={styles.label}>Estás recorriendo:</Text>
-                <Text style={styles.tramoTitle}>{tramoNombre}</Text>
-            </View>
-
-            {/* Botones de Acción */}
-            <View style={styles.actionsContainer}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
                 
-                {/* Botón 1: Crear Nueva Observación */}
-                <TouchableOpacity 
-                    style={[styles.button, styles.createButton]}
-                    onPress={irACaptura}
-                >
-                    <Text style={styles.buttonText}>+ Nueva Observación</Text>
-                    <Text style={styles.buttonSubtext}>Reportar hallazgo</Text>
-                </TouchableOpacity>
+                {/* Encabezado */}
+                <View style={styles.headerContainer}>
+                    <Text style={styles.label}>Estás recorriendo:</Text>
+                    <Text style={styles.tramoTitle}>{tramoNombre}</Text>
+                </View>
 
-                {/* Botón 2: Ver Lista */}
-                <TouchableOpacity 
-                    style={[styles.button, styles.listButton]}
-                    onPress={irALista}
-                >
-                    <Text style={styles.buttonText}>Ver Observaciones</Text>
-                    <Text style={styles.buttonSubtext}>Revisar lo capturado hoy</Text>
-                </TouchableOpacity>
+                {/* Botones de Acción */}
+                <View style={styles.actionsContainer}>
+                    
+                    {/* Botón 1 */}
+                    <TouchableOpacity 
+                        style={[styles.button, styles.createButton]}
+                        onPress={irACaptura}
+                    >
+                        <Text style={styles.buttonText}>+ Nueva Observación</Text>
+                        <Text style={styles.buttonSubtext}>Reportar hallazgo</Text>
+                    </TouchableOpacity>
 
-            </View>
+                    {/* Botón 2 */}
+                    <TouchableOpacity 
+                        style={[styles.button, styles.listButton]}
+                        onPress={irALista}
+                    >
+                        <Text style={styles.buttonText}>Ver Observaciones</Text>
+                        <Text style={styles.buttonSubtext}>Revisar lo capturado hoy</Text>
+                    </TouchableOpacity>
+
+                </View>
+            </ScrollView>
         </View>
     );
 };

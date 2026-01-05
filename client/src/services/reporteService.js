@@ -79,7 +79,6 @@ export const generarReportePDF = async (observaciones) => {
             for (const imgData of obs.imagenes) {
                 const ruta = imgData.ruta.startsWith('/') ? imgData.ruta : `/${imgData.ruta}`;
                 const fullUrl = `${SERVER_URL}${ruta}`;
-                console.log("Procesando imagen:", fullUrl);
                 const base64Img = await getImageFromURL(fullUrl);
                 
                 if (base64Img) {

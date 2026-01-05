@@ -85,7 +85,6 @@ export const useVoiceScreen = (navigation, routeParams) => {
     const procesarYNavegar = async (texto) => {
         setProcesando(true);
         try {
-            console.log("Procesando:", texto);
             // Tu lógica de Regex
             const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: '' };
             const datosDetectados = await procesarTextoDictado(texto, formBase);

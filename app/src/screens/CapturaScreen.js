@@ -1,5 +1,4 @@
 import React from 'react';
-// 1. IMPORTAR useWindowDimensions
 import { View, Text, TouchableOpacity, Image, ScrollView, useColorScheme, useWindowDimensions } from 'react-native';
 import { CameraView } from 'expo-camera';
 
@@ -8,14 +7,11 @@ import { useCapturaScreen } from '../hooks/useCapturaScreen';
 import CustomAlert from "../components/CustomAlert";
 
 const CapturaScreen = ({ route, navigation }) => {
-    // 2. DETECTAR DIMENSIONES Y ORIENTACIÓN
     const { width, height } = useWindowDimensions();
     const isLandscape = width > height;
-
     const theme = useColorScheme();
     const isDark = theme === 'dark';
     
-    // 3. PASAR isLandscape A LOS ESTILOS
     const styles = getStyles(isDark, isLandscape);
 
     const {
@@ -53,7 +49,7 @@ const CapturaScreen = ({ route, navigation }) => {
                 ref={cameraRef}
             />
 
-            {/* Capa GPS */}
+            {/* --- CAPA 1: GPS --- */}
             <View style={styles.topOverlay}>
                 <View style={[styles.badge, coords ? styles.badgeGreen : styles.badgeGray]}>
                     <Text style={styles.badgeText}>
@@ -62,26 +58,33 @@ const CapturaScreen = ({ route, navigation }) => {
                 </View>
             </View>
 
-            {/* Capa Controles (Se adapta a vertical/horizontal gracias a los estilos) */}
-            <View style={styles.controlsOverlay}>
-                
-                {/* Carrusel (Se oculta en Landscape para ahorrar espacio en este diseño simple) */}
-                {!isLandscape && fotos.length > 0 && (
-                    <View style={styles.previewContainer}>
-                        <ScrollView 
-                            horizontal 
-                            ref={scrollRef}
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{paddingHorizontal: 10}}
-                        >
-                            {fotos.map((uri, index) => (
-                                <Image key={index} source={{ uri }} style={styles.miniThumb} />
-                            ))}
-                        </ScrollView>
-                        <Text style={styles.countLabel}>{fotos.length} fotos</Text>
-                    </View>
-                )}
+            {/* --- CAPA 2: CARRUSEL DE FOTOS (FLOTANTE) --- */}
+            {/* MOVIMOS ESTO AFUERA DE LOS CONTROLES PARA QUE SIEMPRE SE VEA */}
+            {fotos.length > 0 && (
+                <View style={styles.previewContainer}>
+                    <ScrollView 
+                        horizontal 
+                        ref={scrollRef}
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{paddingHorizontal: 20}} // Margen interno
+                    >
+                        {fotos.map((uri, index) => (
+                            <Image 
+                                key={index} 
+                                source={{ uri }} 
+                                style={styles.miniThumb}
+                                resizeMode="cover" // ESTO QUITA EL MARGEN RARO DENTRO DE LA IMAGEN
+                            />
+                        ))}
+                    </ScrollView>
+                    {/* Contador debajo solo si estamos en vertical, o a un lado... 
+                        Simplificamos dejándolo abajo del scroll */}
+                    <Text style={styles.countLabel}>{fotos.length} fotos</Text>
+                </View>
+            )}
 
+            {/* --- CAPA 3: CONTROLES (BOTONES) --- */}
+            <View style={styles.controlsOverlay}>
                 <View style={styles.buttonsRow}>
                     <TouchableOpacity 
                         style={styles.smallBtn} 
@@ -109,11 +112,6 @@ const CapturaScreen = ({ route, navigation }) => {
                         <Text style={styles.smallBtnText}>✓</Text>
                     </TouchableOpacity>
                 </View>
-
-                {/* Contador simple para modo Landscape */}
-                {isLandscape && fotos.length > 0 && (
-                     <Text style={[styles.countLabel, { marginTop: 10 }]}>{fotos.length} fotos</Text>
-                )}
             </View>
 
             <CustomAlert 

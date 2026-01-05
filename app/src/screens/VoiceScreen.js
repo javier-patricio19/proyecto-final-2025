@@ -1,14 +1,22 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, Image, ScrollView, useColorScheme } from 'react-native';
+// 1. IMPORTAR ScrollView y useWindowDimensions
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, ScrollView, useColorScheme, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
 import { getStyles } from '../styles/VoiceScreen.styles';
 import { useVoiceScreen } from '../hooks/useVoiceScreen';
 import CustomAlert from "../components/CustomAlert";
 
 const VoiceScreen = ({ route, navigation }) => {
-    const theme = useColorScheme(); 
+    // 2. DETECTAR DIMENSIONES
+    const { width, height } = useWindowDimensions();
+    const isLandscape = width > height;
+
+    const theme = useColorScheme();
     const isDark = theme === 'dark';
-    const styles = getStyles(isDark);
+    
+    // 3. PASAR isLandscape A LOS ESTILOS
+    const styles = getStyles(isDark, isLandscape);
 
     const { 
         grabando, 
@@ -22,6 +30,7 @@ const VoiceScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
+            {/* Cabecera de Fotos (Fija arriba) */}
             <View style={styles.headerContainer}>
                 <ScrollView horizontal contentContainerStyle={styles.thumbScrollView}>
                     {fotos && fotos.map((uri, i) => (
@@ -30,7 +39,9 @@ const VoiceScreen = ({ route, navigation }) => {
                 </ScrollView>
             </View>
 
-            <View style={styles.content}>
+            {/* Contenido Principal (Ahora con Scroll) */}
+            {/* Usamos ScrollView para que si giras la pantalla, puedas bajar a ver el botón */}
+            <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Text style={styles.title}>
                     {procesando ? "Analizando..." : (grabando ? "Escuchando..." : "Presiona para dictar")}
                 </Text>
@@ -49,17 +60,17 @@ const VoiceScreen = ({ route, navigation }) => {
                      {procesando ? (
                         <ActivityIndicator color="#fff" size="large"/>
                       ) : (
-                        <Ionicons name={grabando ? "stop" : "mic"} size={50} color="white" />
+                        <Ionicons name={grabando ? "stop" : "mic"} size={isLandscape ? 30 : 50} color="white" />
                       )}
                 </TouchableOpacity>
 
                 <View style={styles.hintContainer}>
-                    <Text style={styles.hintTitle}>Ejemplo de dictado: </Text>
+                    <Text style={styles.hintTitle}>Ejemplo:</Text>
                     <Text style={styles.hint}>
                         Elemento: "cuneta",kilometro: "45" carril: "1", cuerpo: "A", Observacion:"LLena de basura que corta el flujo", Recomendacion: "ir a quitar la basura antes de que se desborde" 
                     </Text>
                 </View>
-            </View>
+            </ScrollView>
 
             <CustomAlert 
                 visible={alertConfig.visible}

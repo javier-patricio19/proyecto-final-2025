@@ -1,56 +1,60 @@
 import { StyleSheet } from 'react-native';
 import { Colors } from '../theme/Colors';
 
-export const getStyles = (isDark) => {
+// AHORA RECIBIMOS isLandscape
+export const getStyles = (isDark, isLandscape) => {
     const theme = isDark ? Colors.dark : Colors.light;
 
     return StyleSheet.create({
         container: { 
             flex: 1, 
-            backgroundColor: theme.background, 
-            padding: 20 
+            backgroundColor: theme.background
         },
+        // Estilo para el ScrollView
+        scrollContent: {
+            padding: 20,
+            flexGrow: 1, // Permite que el contenido se estire si sobra espacio
+            justifyContent: 'center' // Centra verticalmente si sobra espacio
+        },
+        
         headerContainer: { 
-            marginBottom: 40, 
-            marginTop: 20 
+            // En horizontal reducimos margen para ganar espacio
+            marginBottom: isLandscape ? 10 : 40, 
+            marginTop: isLandscape ? 10 : 20 
         },
         label: { 
             fontSize: 16, 
-            color: theme.textSecondary // Gris suave adaptable
+            color: theme.textSecondary 
         },
         tramoTitle: { 
             fontSize: 24, 
             fontWeight: 'bold', 
-            color: theme.textPrimary, // Negro o Blanco
+            color: theme.textPrimary,
             marginTop: 5
         },
         
         actionsContainer: { 
-            flex: 1, 
-            justifyContent: 'center', 
-            gap: 20 // Espacio entre botones
+            // Ya no usamos flex:1 aquí porque estamos dentro de un ScrollView
+            gap: isLandscape ? 10 : 20, // Menos espacio entre botones en horizontal
+            paddingBottom: 20
         },
         
         button: {
-            padding: 30,
+            // EN HORIZONTAL: Botones más delgados (padding 15 vs 30)
+            padding: isLandscape ? 15 : 30,
             borderRadius: 15,
             alignItems: 'center',
-            // Sombra adaptativa
             elevation: 4, 
-            shadowColor: theme.textPrimary, // La sombra cambia de color según el tema
+            shadowColor: theme.textPrimary,
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.2,
             shadowRadius: 4,
         },
-        createButton: { 
-            backgroundColor: theme.primary // Azul corporativo
-        }, 
-        listButton: { 
-            backgroundColor: theme.success // Verde éxito
-        }, 
+        createButton: { backgroundColor: theme.primary }, 
+        listButton: { backgroundColor: theme.success }, 
         
         buttonText: { 
-            color: '#FFFFFF', // Siempre blanco sobre botones de color fuerte
+            color: '#FFFFFF', 
             fontSize: 20, 
             fontWeight: 'bold', 
             marginBottom: 5 

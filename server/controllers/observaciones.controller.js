@@ -22,11 +22,7 @@ export const getObservacionById = async (req, res) => {
 };
 
 export const createObservacion = async (req, res) => {
-    try {
-        console.log("--- DEBUG START ---");
-        console.log("Body recibido:", req.body);
-        console.log("Archivos recibidos:", req.files ? req.files.length : 0);
-        
+    try {        
         const archivos = req.files;
         const rawData = req.body;
 
@@ -70,7 +66,6 @@ export const createObservacion = async (req, res) => {
 
 export const updateObservacion = async (req, res) => {
     try {
-        console.log("REQ.BODY RECIBIDO:", req.body);
         const archivos = req.files;
         const rawData = req.body;
         

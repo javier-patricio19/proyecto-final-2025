@@ -48,7 +48,6 @@ export const initDatabase = async () => {
                 FOREIGN KEY (observacionId) REFERENCES observaciones (id) ON DELETE CASCADE
             );
         `);
-        console.log("Estructura de BD local completa (Tramos, Elementos, Observaciones e Imágenes).");
     } catch (error) {
         console.error("Error al inicializar la BD:", error);
     }
