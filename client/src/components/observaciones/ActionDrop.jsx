@@ -6,15 +6,25 @@ const ActionDrop = ({ item, onEdit, onDelete }) => {
     const dropdownRef = useRef(null);
 
     useEffect(() => {
+        // Función para cerrar al tocar fuera
         const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setIsOpen(false);
+            }
         };
+
+        // Escuchamos tanto click de mouse como toque de pantalla
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener("touchstart", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("touchstart", handleClickOutside);
+        };
     }, []);
 
     const handleAction = (action, e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // Evita que se abra la tarjeta al hacer click aquí
         if (action === 'edit') onEdit(item);
         if (action === 'delete') onDelete(item.id);
         setIsOpen(false);
@@ -24,8 +34,9 @@ const ActionDrop = ({ item, onEdit, onDelete }) => {
         <div className={styles.container} ref={dropdownRef}>
             <button 
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }} 
-                className={styles.actionDropBtn} 
+                className={`${styles.actionDropBtn} ${isOpen ? styles.active : ''}`}
                 title="Opciones"
+                type="button" // Importante para evitar submits accidentales
             >
                 ⋮
             </button>
@@ -33,10 +44,12 @@ const ActionDrop = ({ item, onEdit, onDelete }) => {
             {isOpen && (
                 <ul className={styles.dropdownMenu}>
                     <li className={styles.dropdownItem} onClick={(e) => handleAction('edit', e)}>
-                        <span className={styles.icon}>✏️</span> Editar
+                        <span className={styles.icon}>✏️</span> 
+                        <span className={styles.text}>Editar</span>
                     </li>
                     <li className={`${styles.dropdownItem} ${styles.delete}`} onClick={(e) => handleAction('delete', e)}>
-                        <span className={styles.icon}>🗑️</span> Eliminar
+                        <span className={styles.icon}>🗑️</span> 
+                        <span className={styles.text}>Eliminar</span>
                     </li>
                 </ul>
             )}

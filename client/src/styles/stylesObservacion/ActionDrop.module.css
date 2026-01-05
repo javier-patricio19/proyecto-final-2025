@@ -1,49 +1,58 @@
 .container {
   position: relative;
   display: inline-block;
+  z-index: 100; /* Asegura que el botón esté por encima */
 }
 
 .actionDropBtn {
-  background: none;
+  background: transparent;
   border: none;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: var(--text-muted);
-  padding: 0 8px;
+  width: 35px;       /* Área de toque cuadrada */
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Redondo para efecto visual */
+  transition: all 0.2s ease;
   line-height: 1;
-  border-radius: 4px;
-  transition: color 0.2s, background-color 0.2s;
+  padding-bottom: 5px; /* Ajuste visual para centrar los puntos */
 }
 
-.actionDropBtn:hover {
-  color: var(--text-main);
-  background-color: var(--bg-color);
+.actionDropBtn:hover, .actionDropBtn.active {
+  color: var(--primary);
+  background-color: rgba(52, 152, 219, 0.1); /* Fondo sutil al tocar */
 }
 
+/* Menú Desplegable */
 .dropdownMenu {
   position: absolute;
   top: 100%;
   right: 0;
   background-color: var(--card-bg);
-  min-width: 140px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  min-width: 160px; /* Un poco más ancho para dedos */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
   border: 1px solid var(--border-color);
-  padding: 5px 0;
-  z-index: 100;
+  padding: 5px;
+  z-index: 1000; /* Muy alto para flotar sobre todo */
   list-style: none;
   margin: 5px 0 0 0;
   animation: fadeIn 0.2s ease;
+  overflow: hidden;
 }
 
 .dropdownItem {
-  padding: 10px 15px;
+  padding: 12px 15px; /* Más espacio vertical para tocar fácil */
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--text-main);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
   transition: background-color 0.2s;
 }
 
@@ -51,19 +60,38 @@
   background-color: var(--bg-color);
 }
 
+.text {
+    font-weight: 500;
+}
+
 .delete {
   color: var(--danger);
+  border-top: 1px solid var(--border-color);
+  margin-top: 2px;
 }
 
 .delete:hover {
-  background-color: rgba(220, 53, 69, 0.1);
+  background-color: rgba(220, 53, 69, 0.08);
 }
 
 .icon {
   font-size: 1.1em;
+  width: 20px;
+  text-align: center;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajuste importante para móviles */
+@media (max-width: 768px) {
+    .dropdownMenu {
+        min-width: 180px; /* Aún más ancho en celular */
+    }
+    
+    .dropdownItem {
+        padding: 15px; /* Botones bien grandes */
+    }
 }

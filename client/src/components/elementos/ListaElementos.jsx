@@ -19,22 +19,23 @@ export const ListaElementos = ({ elementos, loading, error, onEdit, onDataChange
         <table className={styles.table}>
           <thead>
             <tr>
-                <th>ID</th>
-                <th>Tipo</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th style={{width: '180px'}}>Acciones</th>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th style={{width: '180px'}}>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {elementos.map((item) => (
               <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.tipo}</td>
-                <td>{item.nombre}</td>
-                <td>{item.descripcion}</td>
+                {/* Agregamos data-label para la vista móvil */}
+                <td data-label="ID">{item.id}</td>
+                <td data-label="Tipo">{item.tipo}</td>
+                <td data-label="Nombre">{item.nombre}</td>
+                <td data-label="Descripción">{item.descripcion}</td>
                 
-                <td className={styles.actionsCell}>
+                <td className={styles.actionsCell} data-label="Acciones">
                   <button 
                     onClick={() => onEdit(item)} 
                     className={`${styles.btnAction} ${styles.btnEdit}`} 
@@ -54,7 +55,7 @@ export const ListaElementos = ({ elementos, loading, error, onEdit, onDataChange
             ))}
           </tbody>
         </table>
-     )}
+      )}
     </div>
   );
 };

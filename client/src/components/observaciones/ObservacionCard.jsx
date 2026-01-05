@@ -19,50 +19,63 @@ const ObservacionCard = ({
     return (
         <div className={`${styles.obsCard} ${isSelected ? styles.selected : ''}`}>
             
-            <div className={styles.obsCardLeft}>
+            {/* 1. CABECERA: Checkbox a la izq, Menú a la der */}
+            <div className={styles.cardHeader}>
                 <input
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onSelect(item.id)}
                     className={styles.obsCheckbox}
                 />
-                
-                <div className={styles.obsImgContainer}>
-                    {item.imagenes && item.imagenes.length > 0 ? (
-                        <img src={item.imagenes[0].ruta} alt="Evidencia" />
-                    ) : (
-                        <span>Sin foto</span>
-                    )}
-                </div>
-                
-                <div className={styles.obsInfo}>
-                    <span 
-                        onClick={(e) => { e.stopPropagation(); onStatusClick(item); }} 
-                        className={`${styles.statusBadge} ${getStatusClass(item.estado)}`}
-                        title="Clic para cambiar estado"
-                    >
-                        {item.estado}
-                    </span>
-                    
-                    <p className={styles.obsTramo}>
-                       {item.codigo} • {getTramoNombre(item.tramoId)}
-                    </p>
-                    
-                    <p className={styles.obsDetails}>
-                        KM: {item.kilometro} • Cuerpo: {item.cuerpo} • Carril: {item.carril} <br/>
-                        {getElementoNombre(item.elementoId)}
-                    </p>
+                <div className={styles.headerActions}>
+                     <ActionDrop item={item} onEdit={onEdit} onDelete={onDelete} />
                 </div>
             </div>
-            
-            <div className={styles.obsTopRightAction}>
-                <ActionDrop item={item} onEdit={onEdit} onDelete={onDelete} />
+
+            {/* 2. IMAGEN: Ocupa todo el ancho */}
+            <div className={styles.obsImgContainer} onClick={() => onExpand(item.id)}>
+                {item.imagenes && item.imagenes.length > 0 ? (
+                    <img src={item.imagenes[0].ruta} alt="Evidencia" loading="lazy" />
+                ) : (
+                    <div className={styles.noImage}>Sin foto</div>
+                )}
+                
+                {/* Badge de estado flotando sobre la imagen */}
+                <span 
+                    onClick={(e) => { e.stopPropagation(); onStatusClick(item); }} 
+                    className={`${styles.statusBadge} ${getStatusClass(item.estado)}`}
+                    title="Clic para cambiar estado"
+                >
+                    {item.estado}
+                </span>
             </div>
-            
-            <div className={styles.obsBottomRightActions}>
-                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onViewMap(item)}} title="Ver en mapa">📍</button>
-                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onPrint([item])}} title="Ver PDF">📄</button>
-                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onExpand(item.id)}} title="Ver detalles completos">🔍</button>
+
+            {/* 3. INFORMACIÓN: Cuerpo de la tarjeta */}
+            <div className={styles.obsBody} onClick={() => onExpand(item.id)}>
+                <h4 className={styles.obsTitle}>
+                    {item.codigo}
+                </h4>
+                <p className={styles.obsTramo}>
+                    {getTramoNombre(item.tramoId)}
+                </p>
+                
+                <div className={styles.obsDetails}>
+                    <p><strong>Elemento:</strong> {getElementoNombre(item.elementoId)}</p>
+                    <p><strong>Ubicación:</strong> KM {item.kilometro} • {item.cuerpo} • Carril {item.carril}</p>
+                </div>
+            </div>
+
+            {/* 4. PIE DE PÁGINA: Acciones rápidas */}
+            <div className={styles.cardFooter}>
+                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onViewMap(item)}} title="Ver en mapa">
+                    📍 <span className={styles.btnLabel}>Mapa</span>
+                </button>
+                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onPrint([item])}} title="Ver PDF">
+                    📄 <span className={styles.btnLabel}>PDF</span>
+                </button>
+                <button className={styles.iconBtn} onClick={(e) => {e.stopPropagation(); onExpand(item.id)}} title="Detalles">
+                    🔍 <span className={styles.btnLabel}>Ver</span>
+                </button>
             </div>
         </div>
     );

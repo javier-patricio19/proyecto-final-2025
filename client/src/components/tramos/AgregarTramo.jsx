@@ -16,6 +16,7 @@ export const AgregarTramo = ({ onDataAddedCallback }) => {
       <form onSubmit={handleSubmit}>
         <h2 className={styles.header}>Nuevo Tramo</h2>
         
+        {/* Contenedor exclusivo para los inputs */}
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label className={styles.label}>Inicio de tramo:</label>
@@ -38,7 +39,10 @@ export const AgregarTramo = ({ onDataAddedCallback }) => {
               required
             />
           </div>
+        </div>
 
+        {/* Botón separado en su propio contenedor (coherente con EditarTramo) */}
+        <div className={styles.buttonGroup}>
           <button type='submit' disabled={encurso} className={styles.btnSubmit}>
             {encurso ? 'Guardando...' : 'Guardar Tramo'}
           </button>

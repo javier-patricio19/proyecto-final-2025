@@ -45,7 +45,7 @@ function Dashboard() {
         stats, elementosStats, 
         pieChartData, barChartData, 
         elementosChartData, lineChartData,
-         mapPoints 
+          mapPoints 
     } = useDashboardStats();
 
     const location = useLocation();
@@ -96,10 +96,16 @@ function Dashboard() {
                 position: 'bottom',
                 labels: { 
                     color: chartColor, 
-                    font: { size: 12 }
+                    font: { size: 12 },
+                    padding: 20 // Espacio extra alrededor de la leyenda
                 } 
             },
             title: { display: false }
+        },
+        layout: {
+            padding: {
+                bottom: 10 // Padding interno en la gráfica
+            }
         },
         scales: {
             y: { 
@@ -125,9 +131,10 @@ function Dashboard() {
         plugins: { 
             legend: { 
                 position: 'bottom', 
-                labels: { color: chartColor } 
+                labels: { color: chartColor, padding: 20 } 
             } 
-        }
+        },
+        layout: { padding: { bottom: 10 } }
     };
 
     if (loading) return <div className={styles.container}><p>Cargando estadísticas...</p></div>;
@@ -166,7 +173,8 @@ function Dashboard() {
                 {pieChartData && (
                     <div className={styles.chartContainer}>
                         <h3 className={styles.chartTitle}>Distribución por Estado</h3>
-                        <div style={{flex: 1, position: 'relative'}}>
+                        {/* Aumentamos minHeight para darle espacio */}
+                        <div style={{flex: 1, position: 'relative', minHeight: '300px'}}>
                             <Pie data={pieChartData} options={pieOptions} />
                         </div>
                     </div>
@@ -175,7 +183,7 @@ function Dashboard() {
                 {elementosChartData && (
                     <div className={styles.chartContainer}>
                         <h3 className={styles.chartTitle}>Reportes por Elemento</h3>
-                        <div style={{flex: 1, position: 'relative'}}>
+                        <div style={{flex: 1, position: 'relative', minHeight: '300px'}}>
                             <Bar 
                                 data={elementosChartData} 
                                 options={{...chartOptions, indexAxis: 'y'}} 
@@ -187,7 +195,7 @@ function Dashboard() {
                 {barChartData && (
                     <div className={`${styles.chartContainer} ${styles.fullWidth}`}>
                         <h3 className={styles.chartTitle}>Distribución por Tramo</h3>
-                        <div style={{flex: 1, position: 'relative'}}>
+                        <div style={{flex: 1, position: 'relative', minHeight: '350px'}}>
                             <Bar 
                                 data={barChartData} 
                                 options={{...chartOptions, indexAxis: 'y'}} 
@@ -197,9 +205,9 @@ function Dashboard() {
                 )}
                 
                 {lineChartData && (
-                    <div className={`${styles.chartContainer} ${styles.fullWidth}`} style={{ marginTop: '20px' }}>
+                    <div className={`${styles.chartContainer} ${styles.fullWidth}`}>
                         <h3 className={styles.chartTitle}>Historial de Reportes</h3>
-                        <div style={{flex: 1, position: 'relative', minHeight: '300px'}}>
+                        <div style={{flex: 1, position: 'relative', minHeight: '350px'}}>
                             <Line 
                                 data={lineChartData} 
                                 options={chartOptions} 
@@ -208,7 +216,9 @@ function Dashboard() {
                     </div>
                 )}
             </div>
-            <h2 style={{color: 'var(--text-main)', marginBottom: '15px'}}>Geolocalización</h2>
+            
+            {/* Margen superior extra para asegurar que no se encime con la gráfica anterior */}
+            <h2 style={{color: 'var(--text-main)', marginBottom: '15px', marginTop: '40px'}}>Geolocalización</h2>
             <div ref={mapaRef} className={styles.mapWrapper}>
                 <MapContainer center={currentCenter} zoom={currentZoom} style={{ height: '100%', width: '100%' }}>
                     <TileLayer
@@ -249,7 +259,6 @@ function Dashboard() {
                                             {punto.observacion_corta || "Sin descripción disponible."}
                                         </p>
                                         
-                                        {/* Link falso para indicar que se puede ver más */}
                                         <div style={{ marginTop: '8px', borderTop: '1px solid var(--border-color)', paddingTop: '5px' }}>
                                             <small style={{ color: 'var(--primary)', fontWeight: 'bold' }}>
                                                 📍 KM {punto.kilometro}

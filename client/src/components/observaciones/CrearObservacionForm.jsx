@@ -31,16 +31,17 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
         }
     };
 
-    if (loadingTramos || loadingElementos) return <p className="form-loading">Cargando catálogos...</p>;
-    if (errorTramos || errorElementos) return <p className="form-error">Error al cargar datos.</p>;
+    if (loadingTramos || loadingElementos) return <p className={styles.formLoading}>Cargando catálogos...</p>;
+    if (errorTramos || errorElementos) return <p className={styles.formError}>Error al cargar datos.</p>;
 
     const opcionesCuerpo = ['A', 'B'];
     const opcionesCarril = ['1', '2', '3', 'Acotamiento'];
 
     return (
         <form className={styles.mainForm} onSubmit={handleSubmit}>
-            <h2 className="styles.formTitle">Nueva Observación</h2>
+            <h2 className={styles.formTitle}>Nueva Observación</h2>
 
+            {/* Fila 1: Tramo, Elemento, KM */}
             <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Tramo:</label>
@@ -58,19 +59,20 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
                 </div>
                 <div className={`${styles.formGroup} ${styles.small}`}>
                     <label className={styles.label}>Kilómetro:</label>
-                    <input className={styles.formInput} type="text" value={kilometro} onChange={(e) => setKilometro(e.target.value)} required />
+                    <input className={styles.formInput} type="text" value={kilometro} onChange={(e) => setKilometro(e.target.value)} required placeholder="Ej: 20+500" />
                 </div>
             </div>
 
+            {/* Fila 2: Cuerpo, Carril, Fecha */}
             <div className={styles.formRow}>
-                <div className={styles.formInput}>
+                <div className={styles.formGroup}> {/* CORREGIDO: Antes decía formInput */}
                     <label className={styles.label}>Cuerpo:</label>
                     <select className={styles.formInput} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} required>
                         <option value="">Seleccione...</option>
                         {opcionesCuerpo.map((opcion) => <option key={opcion} value={opcion}>{opcion}</option>)}
                     </select>
                 </div>
-                <div className={styles.formInput}>
+                <div className={styles.formGroup}> {/* CORREGIDO: Antes decía formInput */}
                     <label className={styles.label}>Carril:</label>
                     <select className={styles.formInput} value={carril} onChange={(e) => setCarril(e.target.value)} required>
                         <option value="">Seleccione...</option>
@@ -83,20 +85,21 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
                 </div>
             </div>
 
+            {/* Fila 3: Descripciones */}
             <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Observación Detallada:</label>
-                    <textarea className={styles.formInput} value={observacion} onChange={(e) => setObservacion(e.target.value)} required rows={3}></textarea>
+                    <textarea className={styles.formInput} value={observacion} onChange={(e) => setObservacion(e.target.value)} required rows={3} placeholder="Describa el daño con detalle..."></textarea>
                 </div>
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Recomendaciones:</label>
-                    <textarea className={styles.formInput} value={recomendacion} onChange={(e) => setRecomendacion(e.target.value)} required rows={3}></textarea>
+                    <textarea className={styles.formInput} value={recomendacion} onChange={(e) => setRecomendacion(e.target.value)} required rows={3} placeholder="Acción sugerida..."></textarea>
                 </div>
             </div>
 
-            <div className={styles.formGroup}>
+            <div className={styles.formGroup} style={{marginBottom: '1rem'}}>
                 <label className={styles.label}>Observación Corta:</label>
-                <input className={styles.formInput} type="text" value={observacionCorta} onChange={(e) => setObservacionCorta(e.target.value)} required />
+                <input className={styles.formInput} type="text" value={observacionCorta} onChange={(e) => setObservacionCorta(e.target.value)} required placeholder="Resumen para el mapa (Ej: Bache profundo)" />
             </div>
 
             <div className={styles.formGroup}>
@@ -108,15 +111,16 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
                     multiple 
                     required 
                     onChange={handleFileChange}
+                    style={{padding: '10px'}} // Un poco más de aire para el input file
                 />
                 {previews.length > 0 && (
-                    <div className={styles.previewContainer} style={{display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap'}}>
+                    <div className={styles.previewContainer}>
                         {previews.map((src, index) => (
                             <img 
                                 key={index} 
                                 src={src} 
                                 alt={`preview-${index}`} 
-                                style={{width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd'}} 
+                                className={styles.previewImage}
                             />
                         ))}
                     </div>
@@ -137,7 +141,7 @@ export const CrearObservacionForm = ({ onSuccessCallback }) => {
                     {encurso ? 'Enviando...' : 'Agregar Observación'}
                 </button>
             </div>
-            {errorEnvio && <p className="text-danger">Error: {errorEnvio}</p>}
+            {errorEnvio && <p className={styles.formError}>Error: {errorEnvio}</p>}
         </form>
     );
 };

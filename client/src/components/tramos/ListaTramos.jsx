@@ -16,41 +16,45 @@ export const ListaTramos = ({ tramos, loading, error, onEdit, onDataChangeCallba
       {tramos.length === 0 ? (
         <p className={styles.loading}>No hay tramos registrados aún.</p>
       ) : (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Inicio</th>
-              <th>Destino</th>
-              <th style={{width: '150px'}}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tramos.map(item => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.inicio}</td>
-                <td>{item.destino}</td>
-                <td className={styles.actionsCell}>
-                  <button 
-                    onClick={() => onEdit(item)} 
-                    className={`${styles.btnAction} ${styles.btnEdit}`} 
-                    disabled={deleting}
-                  >
-                    Editar
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(item.id)} 
-                    className={`${styles.btnAction} ${styles.btnDelete}`} 
-                    disabled={deleting}
-                  >
-                    Eliminar
-                  </button>
-                </td>
+        // Se añade un contenedor para permitir scroll o manejo de layout
+        <div className={styles.tableResponsive}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Inicio</th>
+                <th>Destino</th>
+                <th style={{ width: '150px' }}>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tramos.map(item => (
+                <tr key={item.id}>
+                  {/* Se añaden atributos data-label para usarlos en CSS móvil */}
+                  <td data-label="ID">{item.id}</td>
+                  <td data-label="Inicio">{item.inicio}</td>
+                  <td data-label="Destino">{item.destino}</td>
+                  <td className={styles.actionsCell} data-label="Acciones">
+                    <button 
+                      onClick={() => onEdit(item)} 
+                      className={`${styles.btnAction} ${styles.btnEdit}`} 
+                      disabled={deleting}
+                    >
+                      Editar
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(item.id)} 
+                      className={`${styles.btnAction} ${styles.btnDelete}`} 
+                      disabled={deleting}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

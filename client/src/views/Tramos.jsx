@@ -1,76 +1,107 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFetchTramos } from '../hooks/tramosHook';
 import { toast } from 'react-toastify';
+import { usePageTitle } from "../hooks/usePageTitle";
+
+// Componentes Hijos
 import { ListaTramos } from '../components/tramos/ListaTramos';
 import { AgregarTramo } from '../components/tramos/AgregarTramo';
 import { EditarTramo } from '../components/tramos/EditarTramo';
-import { usePageTitle } from "../hooks/usePageTitle";
+
+// Importamos los estilos compartidos
+import styles from '../styles/stylesGestion/ListaGestion.module.css';
 
 function Tramos() {
-  usePageTitle("Tramos");
-  useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
+  usePageTitle("Gestión de Tramos");
+  const formRef = useRef(null); // Referencia para scroll automático
+
   const { tramos: fetchedTramos, loading, error } = useFetchTramos();
   const [listaTramos, setListaTramos] = useState([]);
   const [editingTramo, setEditingTramo] = useState(null);
 
+  // Scroll al inicio al montar
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Sincronizar estado local con datos del servidor
   useEffect(() => {
     if (fetchedTramos) {
       setListaTramos(fetchedTramos);
     }
   }, [fetchedTramos]);
 
-  const handleDataChange = (tramoModificadoEliminado) => {
-    if (typeof tramoModificadoEliminado === 'object') {
-      const exits = listaTramos.some(t => t.id === tramoModificadoEliminado.id);
-      
-      if (exits) {
-        setListaTramos(prevlist =>
-          prevlist.map(t => t.id === tramoModificadoEliminado.id ? tramoModificadoEliminado : t)
-        );
-        toast.success("Tramo Actualizado con éxito");
-      } else {
-
-        setListaTramos(prevlist => [...prevlist, tramoModificadoEliminado]);
-        toast.success("Tramo agregado con éxito");
-      }
-    } else if (typeof tramoModificadoEliminado === 'number' || typeof tramoModificadoEliminado === 'string') {
-      const idToDelete = tramoModificadoEliminado;
-      setListaTramos(prevlist => prevlist.filter(t => t.id !== idToDelete));
-      toast.info("Tramo eliminado con éxito");
+  // Manejador centralizado de cambios (CRUD local)
+  const handleDataChange = (payload) => {
+    // CASO 1: Eliminar
+    if (typeof payload === 'number' || typeof payload === 'string') {
+      setListaTramos(prev => prev.filter(t => t.id !== payload));
+      toast.info("Tramo eliminado correctamente.");
+      return;
     }
 
-    setEditingTramo(null);
+    // CASO 2: Guardar/Editar
+    if (typeof payload === 'object' && payload !== null) {
+      const existe = listaTramos.some(t => t.id === payload.id);
+
+      if (existe) {
+        // Actualizar existente
+        setListaTramos(prev => prev.map(t => t.id === payload.id ? payload : t));
+        toast.success("Tramo actualizado con éxito.");
+      } else {
+        // Agregar nuevo
+        setListaTramos(prev => [payload, ...prev]); 
+        toast.success("Tramo agregado con éxito.");
+      }
+      
+      setEditingTramo(null);
+    }
   };
 
   const handleEditClick = (tramo) => {
-    setEditingTramo(tramo); 
+    setEditingTramo(tramo);
+    // UX: Scrollear hacia arriba donde está el formulario
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTramo(null);
   };
 
   return (
-    <div style={{ padding: '20px' }}> 
-      <h1 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Gestión de Tramos</h1>
+    // Usamos la clase pageContainer (que ya incluye el padding responsive)
+    <div className={styles.pageContainer}>
+      <h1 className={styles.pageTitle}>
+        Gestión de Tramos
+      </h1>
 
-      {editingTramo ? (
+      {/* Sección del Formulario con clase para margen */}
+      <div ref={formRef} className={styles.formSection}>
+        {editingTramo ? (
           <EditarTramo 
             tramo={editingTramo} 
             onDataUpdatedCallback={handleDataChange}
-            onCancel={() => setEditingTramo(null)}
+            onCancel={handleCancelEdit}
           />
-      ) : (
+        ) : (
           <AgregarTramo onDataAddedCallback={handleDataChange} />
-      )}
+        )}
+      </div>
       
-      <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid var(--border-color)' }} />
+      <hr className={styles.separator} />
       
-      <ListaTramos 
-        tramos={listaTramos} 
-        loading={loading} 
-        error={error} 
-        onEdit={handleEditClick} 
-        onDataChangeCallback={handleDataChange}
-      />
+      {/* Sección de Lista */}
+      <div>
+        <ListaTramos 
+          tramos={listaTramos} 
+          loading={loading} 
+          error={error} 
+          onEdit={handleEditClick} 
+          onDataChangeCallback={handleDataChange}
+        />
+      </div>
     </div>
   );
 }

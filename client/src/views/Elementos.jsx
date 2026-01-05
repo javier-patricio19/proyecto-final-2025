@@ -5,6 +5,8 @@ import { ListaElementos } from "../components/elementos/ListaElementos";
 import { AgregarElemento } from "../components/elementos/AgregarElemento";
 import { EditarElemento } from "../components/elementos/EditarElemento";
 import { usePageTitle } from "../hooks/usePageTitle";
+// Importamos los estilos (podemos reusar el archivo de ListaGestion o uno general)
+import styles from '../styles/stylesGestion/ListaGestion.module.css';
 
 function Elementos() {
     usePageTitle("Elementos");
@@ -44,8 +46,9 @@ function Elementos() {
     };
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h1 style={{ marginBottom: '20px', color: 'var(--text-main)' }}>Gestión de Elementos</h1>
+        // Usamos una clase en lugar de style inline para controlar el padding en móvil
+        <div className={styles.pageContainer}>
+            <h1 className={styles.pageTitle}>Gestión de Elementos</h1>
             
             {editingElemento ? (
                 <EditarElemento
@@ -57,7 +60,7 @@ function Elementos() {
                 <AgregarElemento onDataAddedCallback={handleDataChange} />
             )}
             
-            <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid var(--border-color)' }} />
+            <hr className={styles.separator} />
             
             <ListaElementos
                 elementos={listaElementos}

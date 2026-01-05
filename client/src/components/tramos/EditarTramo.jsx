@@ -37,6 +37,7 @@ export const EditarTramo = ({ tramo, onDataUpdatedCallback, onCancel }) => {
             <form onSubmit={onSubmit}>
                 <h2 className={styles.header}>Editar Tramo ID: {tramo.id}</h2>
                 
+                {/* Contenedor solo para los inputs */}
                 <div className={styles.formRow}>
                     <div className={styles.formGroup}>
                         <label className={styles.label}>Inicio:</label>
@@ -58,7 +59,10 @@ export const EditarTramo = ({ tramo, onDataUpdatedCallback, onCancel }) => {
                             required 
                         />
                     </div>
+                </div>
 
+                {/* Nuevo contenedor separado para los botones */}
+                <div className={styles.buttonGroup}>
                     <button type='submit' disabled={encursoUpdate} className={styles.btnSubmit}>
                         {encursoUpdate ? 'Actualizando...' : 'Guardar Cambios'}
                     </button>
@@ -66,7 +70,6 @@ export const EditarTramo = ({ tramo, onDataUpdatedCallback, onCancel }) => {
                         Cancelar
                     </button>
                 </div>
-
 
                 {errorUpdate && <p className={styles.errorText}>{errorUpdate}</p>}
             </form>

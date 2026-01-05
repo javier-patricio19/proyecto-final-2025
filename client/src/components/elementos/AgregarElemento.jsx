@@ -17,6 +17,7 @@ export const AgregarElemento = ({ onDataAddedCallback }) => {
         <form onSubmit={handleSubmit}>
           <h2 className={styles.header}>Nuevo Elemento</h2>
           
+          {/* Contenedor para los inputs (se apilarán en móvil) */}
           <div className={styles.formRow}>
               <div className={styles.formGroup}>
                   <label className={styles.label}>Tipo:</label>
@@ -55,6 +56,7 @@ export const AgregarElemento = ({ onDataAddedCallback }) => {
               </div>
           </div>
 
+          {/* Botón separado para control total en móvil */}
           <div className={styles.buttonGroup}>
             <button type="submit" className={styles.btnSubmit} disabled={encurso}>
               {encurso ? 'Guardando...' : 'Agregar Elemento'}

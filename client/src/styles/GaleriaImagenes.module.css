@@ -1,140 +1,212 @@
 .container {
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .title {
   color: var(--text-main);
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  border-left: 5px solid var(--primary);
+  padding-left: 15px;
 }
 
-.filterBar {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-  background-color: var(--card-bg);
+/* --- CONTENEDOR DE GRUPO (Cada Observación) --- */
+.groupContainer {
+  margin-bottom: 40px;
+  background-color: var(--card-bg); /* Fondo sutil para agrupar visualmente */
   padding: 20px;
   border-radius: 12px;
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  align-items: center;
-}
-
-.searchInput {
-  flex: 2;
-  min-width: 200px;
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-color);
-  color: var(--text-main);
-}
-
-.filterSelect {
-  padding: 10px 15px;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  min-width: 150px;
-}
-
-.btnClear {
-  padding: 10px 20px;
-  background-color: var(--text-muted);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btnClear:hover {
-  background-color: var(--text-main);
-}
-
-.groupContainer {
-  margin-bottom: 40px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.03);
   animation: fadeIn 0.5s ease-out;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- HEADER CLICKEABLE DEL GRUPO --- */
 .groupHeader {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-  color: var(--primary);
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
-.groupHeader small {
-  color: var(--text-muted);
-  font-weight: normal;
-  font-size: 0.9rem;
-}
-
-.imageGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.imageWrapper {
-  overflow: hidden;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  margin-bottom: 20px;
   border-radius: 8px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background-color: var(--bg-primary); /* Diferencia el header del cuerpo */
+}
+
+/* Estado Hover del Header */
+.groupHeader:hover {
+  background-color: rgba(52, 152, 219, 0.1); /* Color primario muy suave */
+  transform: translateX(5px); /* Pequeño desplazamiento a la derecha */
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerCode {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary);
+}
+
+.headerDesc {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+.headerAction {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--bg-color);
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  transition: color 0.2s;
+}
+
+.groupHeader:hover .headerAction {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* --- GRID DE IMÁGENES (RESPONSIVE) --- */
+.imageGrid {
+  display: grid;
+  /* Mágia: Columnas automáticas de mínimo 140px. 
+     Se adapta a móviles (2 col) y monitores (muchas col) */
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+/* --- WRAPPER DE CADA FOTO --- */
+.imageWrapper {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   border: 1px solid var(--border-color);
+  aspect-ratio: 1; /* Fuerza a que sean cuadradas perfectas */
+  cursor: zoom-in;
 }
 
 .thumbnail {
-  width: 180px;
-  height: 130px;
-  object-fit: cover;
-  cursor: pointer;
-  transition: transform 0.3s ease, filter 0.3s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Recorta la imagen para llenar el cuadrado sin deformar */
+  transition: transform 0.4s ease;
   display: block;
 }
 
-.thumbnail:hover {
+/* Efecto Zoom en la imagen al hacer hover */
+.imageWrapper:hover .thumbnail {
   transform: scale(1.1);
-  filter: brightness(1.1);
+}
+
+/* --- OVERLAY HOVER (La capa oscura con lupa) --- */
+.overlayHover {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; /* Invisible por defecto */
+  transition: opacity 0.3s ease;
+}
+
+.overlayHover span {
+  font-size: 2rem;
+  color: white;
+  transform: scale(0.8);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.imageWrapper:hover .overlayHover {
+  opacity: 1; /* Visible al hover */
+}
+
+.imageWrapper:hover .overlayHover span {
+  transform: scale(1); /* Efecto pop en el icono */
+}
+
+/* --- ESTADOS DE CARGA Y VACÍO --- */
+.noResultsContainer {
+  padding: 60px 20px;
+  text-align: center;
+  background-color: var(--bg-color);
+  border-radius: 12px;
+  border: 2px dashed var(--border-color);
 }
 
 .noResults {
-  text-align: center;
   color: var(--text-muted);
-  margin-top: 50px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
-.loading, .error {
-  padding: 20px;
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0,0,0,0.1);
+  border-left-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.error { 
+  color: var(--danger);
   text-align: center;
-  color: var(--text-main);
-}
-.error { color: var(--danger); }
-
-.clickableHeader {
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    border-radius: 6px;
-    padding: 5px 10px;
-    margin-left: -10px;
+  padding: 20px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border-radius: 8px;
 }
 
-.clickableHeader:hover {
-    background-color: var(--bg-color);
-    text-decoration: none;
-    color: var(--primary);
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.clickableHeader span {
-    text-decoration: underline;
-    text-decoration-color: rgba(52, 152, 219, 0.3);
-}
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.5rem;
+  }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  .groupContainer {
+    padding: 15px; /* Menos padding en móvil */
+  }
+
+  .imageGrid {
+    /* En móviles muy pequeños, aseguramos al menos 2 columnas */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px;
+  }
+
+  .groupHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .headerAction {
+    width: 100%;
+    text-align: center;
+  }
 }

@@ -1,11 +1,12 @@
+/* --- ESTILOS GENERALES (ESCRITORIO) --- */
 .navbar {
   background-color: var(--card-bg);
   border-bottom: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 10px 20px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: center; /* Centrado vertical */
+  /* NOTA: No usamos justify-content: space-between aquí para poder pegar los links a la izquierda */
   transition: background-color 0.3s, border-color 0.3s;
   height: 65px;
   box-sizing: border-box;
@@ -14,10 +15,30 @@
   z-index: 1000;
 }
 
+.brandContainer {
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+}
+
+.navLogo {
+    height: 40px; 
+    width: auto;
+    object-fit: contain;
+}
+
 .navLinksContainer {
   display: flex;
   gap: 20px;
   align-items: center;
+  margin-left: 30px; /* Separación entre Logo y Links */
+}
+
+/* Esta clase empuja el botón de tema al extremo derecho */
+.desktopActions {
+    margin-left: auto; 
+    display: flex;
+    align-items: center;
 }
 
 .navItem {
@@ -35,6 +56,12 @@
   background-color: var(--bg-color);
 }
 
+/* Ocultamos elementos móviles en escritorio */
+.hamburger, .mobileActions {
+    display: none;
+}
+
+/* Sidebar Escritorio */
 .sidebar {
   width: 240px;
   background-color: var(--bg-color);
@@ -89,14 +116,92 @@
   transition: background-color 0.3s;
 }
 
-.navLogo {
-    height: 40px; 
-    width: auto;
-    margin-right: 10px;
-    object-fit: contain;
-}
+/* --- ESTILOS MÓVILES (Max-Width 768px) --- */
+@media (max-width: 768px) {
+    /* Ajuste del Navbar en móvil */
+    .navbar {
+        justify-content: space-between; /* Logo a la izq, Hamburguesa a la der */
+    }
 
-.brandContainer {
-    display: flex;
-    align-items: center;
+    .navLinksContainer {
+        margin-left: 0; /* Quitamos el margen izquierdo en móvil */
+        position: fixed;
+        left: -100%;
+        top: 65px;
+        flex-direction: column;
+        background-color: var(--card-bg);
+        width: 100%;
+        height: calc(100vh - 65px);
+        padding-top: 20px;
+        transition: 0.3s;
+        border-top: 1px solid var(--border-color);
+        gap: 30px;
+    }
+
+    .navLinksContainer.open {
+        left: 0;
+    }
+
+    .hamburger {
+        display: block;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1001;
+    }
+
+    .bar {
+        display: block;
+        width: 25px;
+        height: 3px;
+        margin: 5px auto;
+        transition: all 0.3s ease-in-out;
+        background-color: var(--text-main);
+    }
+
+    /* Ocultamos el botón de tema de escritorio y mostramos el móvil */
+    .desktopActions {
+        display: none;
+    }
+
+    .mobileActions {
+        display: block;
+        margin-top: 20px;
+    }
+
+    /* Layout Dashboard en Móvil */
+    .dashboardContainer {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 10px 20px;
+    }
+
+    .sidebarContent {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+    }
+
+    .sidebarLink {
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .sidebarTitle {
+        margin-bottom: 10px;
+        font-size: 1em;
+    }
+
+    .mainContent {
+        padding: 15px;
+        height: auto;
+    }
 }

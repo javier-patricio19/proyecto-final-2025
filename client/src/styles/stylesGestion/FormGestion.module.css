@@ -20,8 +20,8 @@
 .formRow {
   display: flex;
   gap: 15px;
-  align-items: flex-end;
   flex-wrap: wrap;
+  /* align-items eliminado para permitir layouts más flexibles */
 }
 
 .formGroup {
@@ -57,6 +57,7 @@
   display: flex;
   gap: 10px;
   margin-top: 15px;
+  justify-content: flex-end; /* En escritorio, botones a la derecha */
 }
 
 .btnSubmit {
@@ -67,6 +68,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  text-align: center;
 }
 
 .btnCancel {
@@ -77,6 +79,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  text-align: center;
 }
 
 .btnCancel:hover {
@@ -88,4 +91,26 @@
   color: var(--danger);
   margin-top: 10px;
   font-size: 0.9rem;
+}
+
+/* --- RESPONSIVIDAD PARA MÓVILES --- */
+@media screen and (max-width: 768px) {
+  .formRow {
+    flex-direction: column; /* Apila los inputs uno sobre otro */
+    gap: 15px;
+  }
+
+  .formGroup {
+    min-width: 100%;
+  }
+
+  .buttonGroup {
+    flex-direction: column; /* Apila los botones */
+    gap: 10px;
+  }
+
+  .btnSubmit, .btnCancel {
+    width: 100%; /* Botones grandes para tocar fácil */
+    padding: 12px;
+  }
 }

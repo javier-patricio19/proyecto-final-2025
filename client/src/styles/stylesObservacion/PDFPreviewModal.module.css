@@ -1,40 +1,58 @@
+/* Animación de entrada suave */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85); /* Un poco menos oscuro para ver contexto */
   z-index: 2000;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* Centrado vertical */
   padding: 20px;
   backdrop-filter: blur(5px);
+  animation: fadeIn 0.2s ease-out;
 }
 
 .toolbar {
   width: 90%;
+  max-width: 1000px; /* Evita que los botones se separen demasiado en monitores grandes */
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
+}
+
+.modalTitle {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  opacity: 0.9;
 }
 
 .content {
   width: 90%;
+  max-width: 1000px;
   height: 85%;
-  background-color: #525659;
+  background-color: #525659; /* Color estándar de fondo de visores PDF */
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  position: relative; /* Necesario para posicionar el loader */
 }
 
 .iframe {
   border: none;
   width: 100%;
   height: 100%;
+  display: block; /* Elimina espacios fantasma en inline-block */
 }
 
+/* --- ESTILOS DE BOTONES --- */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -42,26 +60,82 @@
   cursor: pointer;
   font-weight: 600;
   color: white;
-  transition: filter 0.2s, transform 0.1s;
+  transition: all 0.2s;
   font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre icono y texto */
 }
 
 .btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
 }
 
 .btnClose {
-  background-color: var(--danger);
+  background-color: var(--danger); /* Asegúrate de tener esta variable definida globalmente */
 }
-
 .btnClose:hover {
-  background-color: #c0392b;
+  background-color: #c0392b; 
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.4);
 }
 
 .btnDownload {
-  background-color: var(--success);
+  background-color: var(--success); /* Asegúrate de tener esta variable definida globalmente */
+}
+.btnDownload:hover {
+  background-color: #218838;
+  box-shadow: 0 0 10px rgba(40, 167, 69, 0.4);
 }
 
-.btnDownload:hover {
-  background-color: #27ae60;
+/* --- ESTILOS DEL LOADER (NUEVO) --- */
+.loaderContainer {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #525659;
+  color: #fff;
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- RESPONSIVIDAD (MÓVIL) --- */
+@media (max-width: 768px) {
+  .overlay {
+      padding: 10px; /* Menos padding en móvil */
+  }
+  
+  .toolbar {
+      width: 100%;
+      margin-bottom: 10px;
+  }
+  
+  .content {
+      width: 100%; /* Aprovechar todo el ancho en móvil */
+      height: 90%;
+  }
+
+  .modalTitle {
+      display: none; /* Ocultar título en móviles para dar espacio a los botones */
+  }
+
+  .btn {
+      padding: 8px 14px;
+      font-size: 0.9rem;
+  }
 }
