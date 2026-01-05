@@ -1,7 +1,7 @@
 import axios from 'axios';
 import db from '../database/db';
 
-const API_URL = "http://192.168.101.56:5000/api"; 
+const API_URL = "https://latoya-stereochromatic-georgette.ngrok-free.dev/api"; 
 
 export const syncCatalogos = async () => {
     try {
