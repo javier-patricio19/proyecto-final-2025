@@ -5,6 +5,20 @@
     "version": "1.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
+    "android": {
+      "package": "com.jaamess.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS"
+      ]
+    },
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "splash": {
@@ -15,20 +29,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jaamess.app"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "CAMERA",
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "RECORD_AUDIO",
-        "MODIFY_AUDIO_SETTINGS"
-      ],
-      "package": "com.jaamess.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
