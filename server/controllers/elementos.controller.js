@@ -2,8 +2,9 @@ import * as elementoService from "../services/elementos.service.js";
 
 export const getElementos = async (req, res) => {
     try {
-        const tramos = await elementoService.getAllElementos();
-        res.json(tramos);
+        const elementos = await elementoService.getAllElementos();
+	if (!elementos) return res.json([]);
+        res.json(elementos);
     } catch (error) {
         res.status(500).json({ error: "Error al obtener los elementos"});
     }

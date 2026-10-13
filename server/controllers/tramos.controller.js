@@ -3,6 +3,7 @@ import * as tramoService from "../services/tramos.service.js"
 export const getTramos = async (req, res) => {
     try {
         const tramos = await tramoService.getAllTramos();
+	if (!tramos) return res.json([]);
         res.json(tramos);
     } catch (error) {
         res.status(500).json({error: "Error al obtener los tramos" });
