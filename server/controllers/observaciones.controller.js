@@ -4,7 +4,7 @@ import fs from "fs";
 export const getObservaciones = async (req, res) => {
     try {
         const observaciones = await observacionService.getAll();
-	if (!obervaciones) {
+	if (!observaciones) {
 		return res.json([]);
 	}
         res.json(observaciones);
