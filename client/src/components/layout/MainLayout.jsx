@@ -14,11 +14,13 @@ export const Navbar = () => {
     return (
         <nav className={styles.navbar}>
             <div className={styles.brandContainer}>
-                <img 
-                    src="/logo.png" 
-                    alt="Logo" 
-                    className={styles.navLogo} 
-                />
+                <Link to="/" onclick={toggleMenu}>
+                    <img 
+                        src="/logo.png" 
+                        alt="Logo" 
+                        className={styles.navLogo} 
+                    />
+                </Link>
             </div>
 
             {/* Botón Hamburguesa (Solo visible en móvil por CSS) */}
