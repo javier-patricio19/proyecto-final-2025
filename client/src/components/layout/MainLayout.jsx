@@ -34,7 +34,7 @@ export const Navbar = () => {
             <div className={`${styles.navLinksContainer} ${isOpen ? styles.open : ''}`}>
                 <Link to="/" className={styles.navItem} onClick={toggleMenu}>Inicio</Link>
                 <Link to="/observacion" className={styles.navItem} onClick={toggleMenu}>Agregar Observación</Link>
-                <Link to="/VerObservaciones" className={styles.navItem} onClick={toggleMenu}>Ver Lista</Link>
+                <Link to="/VerObservaciones" className={styles.navItem} onClick={toggleMenu}>Observaciones</Link>
                 <Link to="/imagenes" className={styles.navItem} onClick={toggleMenu}>Galería</Link>
                 <Link to="/gestion" className={styles.navItem} onClick={toggleMenu}>Gestión</Link>
                 

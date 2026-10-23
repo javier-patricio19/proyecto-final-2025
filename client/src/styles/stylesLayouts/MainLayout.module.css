@@ -5,8 +5,7 @@
   color: var(--text-main);
   padding: 10px 20px;
   display: flex;
-  align-items: center; /* Centrado vertical */
-  /* NOTA: No usamos justify-content: space-between aquí para poder pegar los links a la izquierda */
+  align-items: center;
   transition: background-color 0.3s, border-color 0.3s;
   height: 65px;
   box-sizing: border-box;
@@ -26,6 +25,7 @@
     display: flex;
     align-items: center;
     cursor: pointer;
+    z-index:9999;
 }
 
 .navLogo {
@@ -38,10 +38,9 @@
   display: flex;
   gap: 20px;
   align-items: center;
-  margin-left: 30px; /* Separación entre Logo y Links */
+  margin-left: 30px;
 }
 
-/* Esta clase empuja el botón de tema al extremo derecho */
 .desktopActions {
     margin-left: auto; 
     display: flex;
@@ -56,6 +55,9 @@
   transition: color 0.3s;
   padding: 5px 10px;
   border-radius: 4px;
+  position: relative;
+  z-index: 9999;
+  border: 2px solid red;
 }
 
 .navItem:hover {
