@@ -14,7 +14,7 @@ export const Navbar = () => {
     return (
         <nav className={styles.navbar}>
             <div className={styles.brandContainer}>
-                <Link to="/" onclick={() => setIsOpen(false)}>
+                <Link to="/" className={styles.navItem} onClick={toggleMenu}>
                     <img 
                         src="/logo.png" 
                         alt="Logo" 
@@ -57,8 +57,8 @@ export const Sidebar = () => {
         <aside className={styles.sidebar}>
             <h3 className={styles.sidebarTitle}>Menú Gestión</h3>
             <div className={styles.sidebarContent}>
-                <Link to="/gestion/Tramos" className={styles.sidebarLink}>📍 Tramos</Link>
-                <Link to="/gestion/Elementos" className={styles.sidebarLink}>🚧 Elementos</Link>
+                <Link to="/gestion/Tramos" className={styles.sidebarLink}>Tramos</Link>
+                <Link to="/gestion/Elementos" className={styles.sidebarLink}>Elementos</Link>
             </div>
         </aside>
     );
