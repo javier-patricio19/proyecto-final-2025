@@ -14,7 +14,7 @@ export const Navbar = () => {
     return (
         <nav className={styles.navbar}>
             <div className={styles.brandContainer}>
-                <Link to="/" className={styles.navItem} onClick={toggleMenu}>
+                <Link to="/" className={styles.navItem} onClick={() => setIsOpen(false)}>
                     <img 
                         src="/logo.png" 
                         alt="Logo" 
