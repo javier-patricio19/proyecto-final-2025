@@ -55,9 +55,6 @@
   transition: color 0.3s;
   padding: 5px 10px;
   border-radius: 4px;
-  position: relative;
-  z-index: 9999;
-  border: 2px solid red;
 }
 
 .navItem:hover {
