@@ -1,4 +1,4 @@
-  {
+{
   "expo": {
     "name": "GP ARIES",
     "slug": "app",
@@ -16,7 +16,9 @@
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
         "RECORD_AUDIO",
-        "MODIFY_AUDIO_SETTINGS"
+        "MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "userInterfaceStyle": "light",
@@ -64,8 +66,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "9c4ffa71-9508-4149-97a6-d31a5aa30f88"
-      }
+        "projectId": "72dd2dbd-1498-4d9c-8f41-39529d0fd3f0"
+      },
+      "router": {}
     }
   }
 }

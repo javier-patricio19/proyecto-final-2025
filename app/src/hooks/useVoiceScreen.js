@@ -58,27 +58,48 @@ export const useVoiceScreen = (navigation, routeParams) => {
 
     // --- CICLO DE VIDA ---
     useEffect(() => {
-        Voice.onSpeechStart = onSpeechStart;
-        Voice.onSpeechEnd = onSpeechEnd;
-        Voice.onSpeechPartialResults = onSpeechPartialResults;
-        Voice.onSpeechResults = onSpeechResults;
-        Voice.onSpeechError = onSpeechError;
-
+        if (Voice && typeof Voice.onSpeechStart !== 'undefined') {
+            Voice.onSpeechStart = onSpeechStart;
+            Voice.onSpeechEnd = onSpeechEnd;
+            Voice.onSpeechPartialResults = onSpeechPartialResults;
+            Voice.onSpeechResults = onSpeechResults;
+            Voice.onSpeechError = onSpeechError;
+        }else{
+            console.warn("Módulo de voz no disponible.");
+        }
+     
         return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
+            if (Voice && typeof Voice.destroy === 'function'){
+                Voice.destroy().then(() => Voice.removeAllListeners()).catch(e => console.warn(e));
+            }
         };
     }, []);
 
     // --- ACCIONES ---
 
     const toggleGrabacion = async () => {
+        if (!Voice || typeof Voice.start !== 'function') {
+            showAlert('error', 'Error de entorno', 'La grabación de voz no está disponible en Expo Go. Compila la app o usa un Dev Client.');
+            return;
+        }
+
         if (grabando) {
             try { await Voice.stop(); } catch (e) { console.error(e); }
         } else {
             try { 
                 setTextoParcial('');
                 await Voice.start('es-ES'); 
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.log("modulo de voz no disponible en Expo Go.");
+                const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: ''};
+                navigation.navigate('FormularioObservacion', {
+                    tramoId,
+                    tramoNombre,
+                    fotos,
+                    coords,
+                    datosDetectados: formBase
+                });
+            }
         }
     };
 
