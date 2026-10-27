@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { PermissionsAndroid, Platform } from 'react-native';
 import Voice from '@react-native-voice/voice';
 import { procesarTextoDictado } from '../utils/VoiceLogic';
 
@@ -18,53 +19,60 @@ export const useVoiceScreen = (navigation, routeParams) => {
         setAlertConfig(prev => ({ ...prev, visible: false }));
     };
 
-    // --- MANEJADORES DE VOZ ---
-    
-    // Se dispara cuando detecta que empezaste a hablar
-    const onSpeechStart = () => {
-        setGrabando(true);
-        setTextoParcial('');
-    };
-
-    // Se dispara cuando detecta que dejaste de hablar
-    const onSpeechEnd = () => {
-        setGrabando(false);
-    };
-
-    // Resultados parciales (tiempo real)
-    const onSpeechPartialResults = (e) => {
-        if (e.value && e.value.length > 0) {
-            setTextoParcial(e.value[0]);
-        }
-    };
-
-    // Resultados finales
-    const onSpeechResults = async (e) => {
-        if (e.value && e.value.length > 0) {
-            const textoFinal = e.value[0];
-            await procesarYNavegar(textoFinal);
-        }
-    };
-
-    const onSpeechError = (e) => {
-        setGrabando(false);
-        // Ignoramos errores de "no speech" (7) o reconocimiento en progreso (5)
-        const errMsg = e.error?.message || '';
-        if (errMsg.includes('7') || errMsg.includes('no speech')) return;
-        
-        showAlert('error', 'Error de Voz', 'No te escuché bien, intenta de nuevo.');
-        console.log("Error Voice:", e);
-    };
-
     // --- CICLO DE VIDA ---
     useEffect(() => {
+        const onSpeechStart = () => {
+            setGrabando(true);
+            setTextoParcial('');
+        };
+
+        const onSpeechEnd = () => {
+            setGrabando(false);
+        };
+
+        const onSpeechPartialResults = (e) => {
+            if (e.value && e.value.length > 0) {
+                setTextoParcial(e.value[0]);
+            }
+        };
+
+        const onSpeechResults = async (e) => {
+            if (e.value && e.value.length > 0) {
+                const textoFinal = e.value[0];
+                setProcesando(true);
+                try {
+                    const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: '' };
+                    const datosDetectados = await procesarTextoDictado(textoFinal, formBase);
+
+                    setProcesando(false);
+                    // Navegación
+                    navigation.navigate('FormularioObservacion', { 
+                        tramoId, tramoNombre, fotos, coords, datosDetectados 
+                    });
+
+                } catch (error) {
+                    setProcesando(false);
+                    showAlert('error', 'Error Lógica', 'No pude procesar los datos del dictado.');
+                }
+            }
+        };
+
+        const onSpeechError = (e) => {
+            setGrabando(false);
+            const errMsg = e.error?.message || '';
+            if (errMsg.includes('7') || errMsg.includes('no speech')) return;
+            
+            showAlert('error', 'Error de Voz', 'No te escuché bien, intenta de nuevo.');
+            console.log("Error Voice:", e);
+        };
+
         if (Voice && typeof Voice.onSpeechStart !== 'undefined') {
             Voice.onSpeechStart = onSpeechStart;
             Voice.onSpeechEnd = onSpeechEnd;
             Voice.onSpeechPartialResults = onSpeechPartialResults;
             Voice.onSpeechResults = onSpeechResults;
             Voice.onSpeechError = onSpeechError;
-        }else{
+        } else {
             console.warn("Módulo de voz no disponible.");
         }
      
@@ -73,24 +81,35 @@ export const useVoiceScreen = (navigation, routeParams) => {
                 Voice.destroy().then(() => Voice.removeAllListeners()).catch(e => console.warn(e));
             }
         };
-    }, []);
+    }, [navigation, tramoId, tramoNombre, fotos, coords]); 
 
     // --- ACCIONES ---
-
     const toggleGrabacion = async () => {
         if (!Voice || typeof Voice.start !== 'function') {
-            showAlert('error', 'Error de entorno', 'La grabación de voz no está disponible en Expo Go. Compila la app o usa un Dev Client.');
+            showAlert('error', 'Error de entorno', 'La grabación de voz no está disponible. Usa el APK compilado.');
             return;
         }
 
         if (grabando) {
             try { await Voice.stop(); } catch (e) { console.error(e); }
         } else {
+            if (Platform.OS === 'android') {
+                try {
+                    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+                    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                        showAlert('error', 'Permiso Denegado', 'Necesitas dar permiso al micrófono.');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn(err);
+                }
+            }
+
             try { 
                 setTextoParcial('');
-                await Voice.start('es-ES'); 
+                await Voice.start('es-MX'); 
             } catch (e) { 
-                console.log("modulo de voz no disponible en Expo Go.");
+                console.log("modulo de voz no disponible.", e);
                 const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: ''};
                 navigation.navigate('FormularioObservacion', {
                     tramoId,
@@ -100,25 +119,6 @@ export const useVoiceScreen = (navigation, routeParams) => {
                     datosDetectados: formBase
                 });
             }
-        }
-    };
-
-    const procesarYNavegar = async (texto) => {
-        setProcesando(true);
-        try {
-            // Tu lógica de Regex
-            const formBase = { elementoId: '', kilometro: '', cuerpo: '', carril: '', observacion: '', recomendacion: '' };
-            const datosDetectados = await procesarTextoDictado(texto, formBase);
-
-            setProcesando(false);
-            // Navegación
-            navigation.navigate('FormularioObservacion', { 
-                tramoId, tramoNombre, fotos, coords, datosDetectados 
-            });
-
-        } catch (error) {
-            setProcesando(false);
-            showAlert('error', 'Error Lógica', 'No pude procesar los datos del dictado.');
         }
     };
 

@@ -1,5 +1,4 @@
 import React from 'react';
-// 1. IMPORTAR ScrollView y useWindowDimensions
 import { View, Text, TouchableOpacity, ActivityIndicator, Image, ScrollView, useColorScheme, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -8,14 +7,11 @@ import { useVoiceScreen } from '../hooks/useVoiceScreen';
 import CustomAlert from "../components/CustomAlert";
 
 const VoiceScreen = ({ route, navigation }) => {
-    // 2. DETECTAR DIMENSIONES
     const { width, height } = useWindowDimensions();
     const isLandscape = width > height;
 
     const theme = useColorScheme();
     const isDark = theme === 'dark';
-    
-    // 3. PASAR isLandscape A LOS ESTILOS
     const styles = getStyles(isDark, isLandscape);
 
     const { 
@@ -39,8 +35,7 @@ const VoiceScreen = ({ route, navigation }) => {
                 </ScrollView>
             </View>
 
-            {/* Contenido Principal (Ahora con Scroll) */}
-            {/* Usamos ScrollView para que si giras la pantalla, puedas bajar a ver el botón */}
+            {/* Contenido Principal */}
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Text style={styles.title}>
                     {procesando ? "Analizando..." : (grabando ? "Escuchando..." : "Presiona para dictar")}
