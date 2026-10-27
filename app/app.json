@@ -21,12 +21,16 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#121212"
+      }
     },
     "ios": {
       "supportsTablet": true,
@@ -46,6 +50,8 @@
             "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0",
             "kotlinVersion": "2.1.20",
+            "userInterfaceStyle": "automatic",
+            "softwareKeyboardLayoutMode": "pan",
             "extraGradleProps": {
               "android.useAndroidX": "true",
               "android.enableJetifier": "true"

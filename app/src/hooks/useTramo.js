@@ -46,7 +46,7 @@ export const useTramoScreen = (navigation) => {
             if (resultado.success) {
                 showAlert('success', 'Sincronización Completa', resultado.message, [{ text: 'Excelente' }]);
             } else {
-                showAlert('error', 'Error de Conexión', 'Verifica tu internet e intenta de nuevo.');
+                showAlert('error', 'Error de sincronización', resultado.message);
             }
         } catch (error) {
             showAlert('error', 'Error', 'Ocurrió un error inesperado al subir datos.');

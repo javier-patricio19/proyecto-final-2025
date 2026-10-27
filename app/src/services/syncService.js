@@ -55,13 +55,12 @@ export const subirDatosPendientes = async () => {
 
         let subidos = 0;
         let errores = 0;
+        let ultimoError = "";
 
         for (const obs of pendientes) {
             try {
                 // 2. Buscar fotos
                 const fotos = await db.getAllAsync('SELECT uri FROM imagenes WHERE observacionId = ?', [obs.id]);
-
-
                 const formData = new FormData();
 
                 formData.append('kilometro', obs.kilometro);
@@ -108,8 +107,18 @@ export const subirDatosPendientes = async () => {
                 subidos++;
 
             } catch (error) {
-                console.error(`❌ Falló obs ID ${obs.id}:`, error.message);
+                console.log(`❌ Falló obs ID ${obs.id}:`, error.message);
                 errores++;
+                ultimoError = error.message;
+            }
+        }
+
+        if (errores > 0) {
+            return{
+                success: false,
+                subidos,
+                errores,
+                message: `Error al subir. Motive: ${ultimoError}`
             }
         }
 

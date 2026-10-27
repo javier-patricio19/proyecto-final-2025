@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, useColorScheme } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { getStyles } from '../styles/FormularioObservacion.styles';
 import { useFormularioObservacion } from '../hooks/useFormularioObservacion';
 import CustomAlert from '../components/CustomAlert';
@@ -25,8 +26,14 @@ const FormularioObservacionScreen = ({ route, navigation }) => {
         handleGuardar
     } = useFormularioObservacion(navigation, route.params);
 
-    return (
-        <View style={styles.container}>
+return (
+        <KeyboardAwareScrollView
+            style={styles.container}
+            contentContainerStyle={{ flexGrow: 1 }}
+            enableOnAndroid={true}
+            extraScrollHeight={200}
+            keyboardShouldPersistTaps="handled"
+        >
             {/* Header con Fotos */}
             <View style={styles.photosHeader}>
                 <ScrollView horizontal contentContainerStyle={styles.thumbScrollView}>
@@ -36,7 +43,7 @@ const FormularioObservacionScreen = ({ route, navigation }) => {
                 </ScrollView>
             </View>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.scrollContent}>
                 {/* Título y Botón Volver */}
                 <View style={styles.headerRow}>
                     <Text style={styles.headerTitle}>Verifica los datos:</Text>
@@ -54,7 +61,7 @@ const FormularioObservacionScreen = ({ route, navigation }) => {
                         onValueChange={(v) => handleChange('elementoId', v)}
                         style={styles.picker}
                         dropdownIconColor={pickerTextColor}
-                        itemStyle={{color: pickerTextColor}} // Para iOS
+                        itemStyle={{color: pickerTextColor}} 
                     >
                         <Picker.Item label="-- Selecciona --" value="" color={pickerTextColor} />
                         {listaElementos.map((item) => (
@@ -141,8 +148,10 @@ const FormularioObservacionScreen = ({ route, navigation }) => {
                 <TouchableOpacity style={styles.btnGuardar} onPress={handleGuardar}>
                     <Text style={styles.txtBtn}>GUARDAR DATOS</Text>
                 </TouchableOpacity>
+
+                <View style={{ height:100 }} />
                 
-            </ScrollView>
+            </View>
 
             <CustomAlert 
                 visible={alertConfig.visible}
@@ -152,7 +161,7 @@ const FormularioObservacionScreen = ({ route, navigation }) => {
                 buttons={alertConfig.buttons}
                 onClose={hideAlert}
             />
-        </View>
+        </KeyboardAwareScrollView>
     );
 };
 
