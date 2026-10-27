@@ -1,7 +1,7 @@
 import axios from 'axios';
 import db from '../database/db';
 
-const API_URL = "https://latoya-stereochromatic-georgette.ngrok-free.dev/api"; 
+const API_URL = "https://api.gestionaries.site/api"; 
 
 export const syncCatalogos = async () => {
     try {
@@ -10,7 +10,7 @@ export const syncCatalogos = async () => {
             axios.get(`${API_URL}/elementos`, { timeout: 10000 })
         ]);
 
-        // Guardar en la BD local con Transacción
+        
         await db.withTransactionAsync(async () => {
             await db.runAsync('DELETE FROM tramos');
             for (const t of resTramos.data) {
@@ -97,7 +97,7 @@ export const subirDatosPendientes = async () => {
                 // 4. ENVIAR
                 await axios.post(`${API_URL}/observaciones`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
-                    timeout: 15000 
+                    timeout: 60000 
                 });
 
                 // 5. LIMPIEZA POST-SUBIDA
