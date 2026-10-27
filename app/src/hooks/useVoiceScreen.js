@@ -66,7 +66,7 @@ export const useVoiceScreen = (navigation, routeParams) => {
             console.log("Error Voice:", e);
         };
 
-        if (Voice && typeof Voice.onSpeechStart !== 'undefined') {
+        if (Voice) {
             Voice.onSpeechStart = onSpeechStart;
             Voice.onSpeechEnd = onSpeechEnd;
             Voice.onSpeechPartialResults = onSpeechPartialResults;
